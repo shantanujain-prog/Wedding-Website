@@ -356,6 +356,8 @@
   ],
   "framerusercontent.com/images/7Jr9KCHDFL5pwPFZFeisN44Yzi4.webp?scale-down-to=512&width=684&height=112": [
    "framerusercontent.com/images/7Jr9KCHDFL5pwPFZFeisN44Yzi4.webp~scale-down-to_512_width_684_height_112.2d6da9c6",
+   "image/webp",
+   "framerusercontent.com/images/7Jr9KCHDFL5pwPFZFeisN44Yzi4.webp~scale-down-to_512_width_684_height_112.2d6da9c6.noavif",
    "image/webp"
   ],
   "framerusercontent.com/images/7Jr9KCHDFL5pwPFZFeisN44Yzi4.webp?width=684&height=112": [
@@ -406,10 +408,14 @@
   ],
   "framerusercontent.com/images/DIljN6CZ5Ok94fYAeNVQ4nSQOEo.webp?scale-down-to=512&width=1220&height=200": [
    "framerusercontent.com/images/DIljN6CZ5Ok94fYAeNVQ4nSQOEo.webp~scale-down-to_512_width_1220_height_200.e4bd6fe7",
+   "image/webp",
+   "framerusercontent.com/images/DIljN6CZ5Ok94fYAeNVQ4nSQOEo.webp~scale-down-to_512_width_1220_height_200.e4bd6fe7.noavif",
    "image/webp"
   ],
   "framerusercontent.com/images/DIljN6CZ5Ok94fYAeNVQ4nSQOEo.webp?width=1220&height=200": [
    "framerusercontent.com/images/DIljN6CZ5Ok94fYAeNVQ4nSQOEo.webp~width_1220_height_200.94bb783b",
+   "image/webp",
+   "framerusercontent.com/images/DIljN6CZ5Ok94fYAeNVQ4nSQOEo.webp~width_1220_height_200.94bb783b.noavif",
    "image/webp"
   ],
   "framerusercontent.com/images/DRFRG6BredDwQiJY7bR0l7zYMs.webp?scale-down-to=512&width=538&height=109": [
@@ -2278,6 +2284,8 @@
   ],
   "framerusercontent.com/images/fh6rhHrxI1397e5fR1HuT0QU.webp?scale-down-to=512&width=1515&height=85": [
    "framerusercontent.com/images/fh6rhHrxI1397e5fR1HuT0QU.webp~scale-down-to_512_width_1515_height_85.1cee946c",
+   "image/webp",
+   "framerusercontent.com/images/fh6rhHrxI1397e5fR1HuT0QU.webp~scale-down-to_512_width_1515_height_85.1cee946c.noavif",
    "image/webp"
   ],
   "framerusercontent.com/images/fh6rhHrxI1397e5fR1HuT0QU.webp?width=1515&height=85": [
@@ -2556,6 +2564,18 @@
    "images.unsplash.com/photo-1506744038136-46273834b3fb~w_400_h_400_fit_crop.128d8a8f",
    "image/jpeg"
   ],
+  "tile.openstreetmap.org/13/5752/3652.png": [
+   "tile.openstreetmap.org/13/5752/3652.png",
+   "image/png"
+  ],
+  "tile.openstreetmap.org/13/5752/3653.png": [
+   "tile.openstreetmap.org/13/5752/3653.png",
+   "image/png"
+  ],
+  "tile.openstreetmap.org/13/5752/3654.png": [
+   "tile.openstreetmap.org/13/5752/3654.png",
+   "image/png"
+  ],
   "tile.openstreetmap.org/13/5753/3652.png": [
    "tile.openstreetmap.org/13/5753/3652.png",
    "image/png"
@@ -2566,6 +2586,14 @@
   ],
   "tile.openstreetmap.org/13/5753/3654.png": [
    "tile.openstreetmap.org/13/5753/3654.png",
+   "image/png"
+  ],
+  "tile.openstreetmap.org/13/5754/3649.png": [
+   "tile.openstreetmap.org/13/5754/3649.png",
+   "image/png"
+  ],
+  "tile.openstreetmap.org/13/5754/3650.png": [
+   "tile.openstreetmap.org/13/5754/3650.png",
    "image/png"
   ],
   "tile.openstreetmap.org/13/5754/3652.png": [

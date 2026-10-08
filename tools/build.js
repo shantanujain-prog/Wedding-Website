@@ -305,9 +305,12 @@ async function main() {
   }
   console.log('refreshing Framer images');
   await refreshImages();
-  const avifKeys = [...assets].filter(([k, a]) => k.startsWith('framerusercontent.com/images/') && a.type === 'image/avif').map(([k]) => k);
-  console.log(`fetching non-AVIF versions of ${avifKeys.length} images`);
-  await downloadAll(avifKeys, 8, { fresh: true, accept: WEBP_ACCEPT, store: webpAssets });
+  // The CDN can answer a browser without AVIF support with different bytes
+  // (another format, or for some URLs a scaled copy), so fetch every image
+  // again with such an Accept header and keep the answer when it differs.
+  const imageKeys = [...assets.keys()].filter((k) => k.startsWith('framerusercontent.com/images/'));
+  console.log(`fetching non-AVIF versions of ${imageKeys.length} images`);
+  await downloadAll(imageKeys, 8, { fresh: true, accept: WEBP_ACCEPT, store: webpAssets });
 
   // Write the site.
   fs.rmSync(OUT, { recursive: true, force: true });
@@ -338,7 +341,7 @@ async function main() {
     fs.writeFileSync(path.join(OUT, file), body);
     manifest.assets[key] = [file, a.type];
     const alt = webpAssets.get(key);
-    if (alt && alt.type !== a.type) {
+    if (alt && !alt.body.equals(a.body)) {
       fs.writeFileSync(path.join(OUT, file + '.noavif'), alt.body);
       manifest.assets[key].push(file + '.noavif', alt.type);
     }

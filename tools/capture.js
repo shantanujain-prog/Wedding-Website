@@ -66,6 +66,14 @@ async function mapJourney(page) {
     for (const step of [zoomIn, zoomIn, zoomOut, zoomOut, zoomOut]) {
       if (await step.isVisible()) { await step.click(); await settleTiles(page); }
     }
+    // Back to the default zoom and a short drag, as a visitor looking around.
+    if (button) { await button.click(); await settleTiles(page); }
+    const b = await map.boundingBox();
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(b.x + b.width / 2 + 80, b.y + b.height / 2 + 48, { steps: 8 });
+    await page.mouse.up();
+    await settleTiles(page);
   }
 }
 

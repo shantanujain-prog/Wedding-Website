@@ -86,9 +86,30 @@ function send(req, res, status, file, type, headers, { etag = false } = {}) {
       return res.end();
     }
   }
+  // Byte ranges, as the CDN supports them (iOS Safari requires them for audio).
+  const range = status === 200 && /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+  if (range && (range[1] || range[2])) {
+    let start = range[1] ? Number(range[1]) : Math.max(0, buf.length - Number(range[2]));
+    let end = range[1] && range[2] ? Math.min(Number(range[2]), buf.length - 1) : buf.length - 1;
+    if (start >= buf.length || start > end) {
+      res.writeHead(416, { 'content-range': `bytes */${buf.length}`, ...headers });
+      return res.end();
+    }
+    const part = buf.subarray(start, end + 1);
+    res.writeHead(206, {
+      'content-type': type,
+      'content-length': part.length,
+      'content-range': `bytes ${start}-${end}/${buf.length}`,
+      'accept-ranges': 'bytes',
+      'x-content-type-options': 'nosniff',
+      ...headers,
+    });
+    return res.end(req.method === 'HEAD' ? undefined : part);
+  }
   res.writeHead(status, {
     'content-type': type,
     'content-length': buf.length,
+    'accept-ranges': 'bytes',
     'x-content-type-options': 'nosniff',
     ...headers,
   });
