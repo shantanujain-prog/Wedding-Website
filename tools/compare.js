@@ -203,11 +203,11 @@ const domKeys = (diffs) => new Set(diffs.flatMap((d) => Object.keys(d).filter((k
       const name = `${route === '/' ? 'home' : route.slice(1).replace(/\W+/g, '-')}-${width}`;
       // A = live site, B = live site again (control: what varies between two
       // loads of the original), C = clone.
-      const [a, b, c] = await Promise.all([
-        shoot(browser, SITE + route, width, false),
-        shoot(browser, SITE + route, width, false),
-        shoot(browser, CLONE + route, width, true),
-      ]);
+      // Loaded one at a time: on a small machine, parallel loads starve the
+      // live site's startup and it can render a broken layout.
+      const a = await shoot(browser, SITE + route, width, false);
+      const b = await shoot(browser, SITE + route, width, false);
+      const c = await shoot(browser, CLONE + route, width, true);
       fs.writeFileSync(path.join(OUT, `${name}.original.png`), a.png);
       fs.writeFileSync(path.join(OUT, `${name}.clone.png`), c.png);
       const noise = await pixelDiff(browser, a.png, b.png, path.join(OUT, `${name}.control-diff.png`));
