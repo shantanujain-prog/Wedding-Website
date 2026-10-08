@@ -61,16 +61,47 @@ These are deliberate and have no visible effect:
 These are limits of an offline copy:
 
 - **Map tiles:** the map draws OpenStreetMap tiles, a live third-party
-  service whose usage policy forbids bulk downloading. The clone stores the 71
+  service whose usage policy forbids bulk downloading. The clone stores the 76
   tiles a browser loads while using the live map normally: both venue
-  locations at their default zoom (14), one step out (13) and two steps in
-  (15, 16). Those views work offline. For any other tile (further zoom, or
+  locations at their default zoom (14), one step out (13), two steps in
+  (15, 16) and a short drag. Those views work offline. For any other tile (further zoom, or
   panning away) the server redirects the browser to `tile.openstreetmap.org`,
   so with internet the map behaves exactly like the live one. Offline, or with
   `OFFLINE=1`, those areas stay grey.
 - **External links:** the Google Maps directions link, the RSVP WhatsApp
   (`wa.me`) link and the "Made in Framer" badge link still point to those
   services, as they do on the live site. Opening them needs internet access.
+
+## How it was verified
+
+`tools/compare.js` loads each route at 390, 810, 1200, 1440 and 1920 px wide,
+once on the live site, once more on the live site as a control, and once on the
+clone. All three run on the same frozen, manually advanced clock, so
+script-driven animations end on the same frame. It then compares full-page
+screenshots, the box and computed styles of every element, and the clone's
+network traffic. Results of the last run:
+
+- Page heights, element boxes and computed styles match on every route and
+  width. Any remaining difference also occurs between two loads of the live
+  site.
+- The 404 page is pixel-identical at every width.
+- The remaining pixel differences are the continuously animated birds, bells
+  and rotating gallery, plus occasional text anti-aliasing. These vary just as
+  much between two loads of the live site. In repeated 1440 px runs, the best
+  clone/live pair differed by 279 of 17.6 million pixels, and the best
+  live/live pair by 344.
+- The clone made no external requests and had no failed requests.
+
+Further checks, live against clone:
+
+- hover, focus and cursor states, and keyboard Tab order;
+- head and meta tags, anchors, history and scroll behaviour;
+- scroll-linked and appear animations, and smooth scrolling;
+- the RSVP form and its WhatsApp link, and the bell sound;
+- every step of the map at three sizes;
+- image selection at 24 widths and DPR 1/2/3;
+- image bytes for AVIF and non-AVIF browsers;
+- the server's responses for redirects, 404s and HTTP methods.
 
 ## Refreshing the copy after re-publishing in Framer
 
