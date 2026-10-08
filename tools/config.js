@@ -11,6 +11,8 @@ module.exports = {
     { path: '/page', file: 'page.html', routeId: 'Bw06UtcCP' },
   ],
   NOT_FOUND_PROBE: '/this-page-does-not-exist',
+  // Non-page files the Framer host serves at the site root.
+  EXTRA_FILES: ['/robots.txt', '/sitemap.xml'],
 
   // Hosts whose files are self-hosted under /<host>/... in the clone.
   // The a/b/c OpenStreetMap tile subdomains are folded into one directory.
@@ -28,7 +30,4 @@ module.exports = {
   // so every URL stays absolute exactly as on the live site.
   ORIGIN_TOKEN: '__CLONE_ORIGIN__',
 
-  // Venue marker of the Leaflet map (from the map component's props) and the
-  // largest map container seen across breakpoints, used to pre-fetch tiles.
-  MAP: { lat: 19.2183, lng: 72.9781, zooms: [11, 12, 13, 14, 15, 16, 17, 18], width: 700, height: 460 },
 };

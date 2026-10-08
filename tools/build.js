@@ -5,8 +5,10 @@
 //  2. Scans every HTML/JS/CSS/JSON file for further URLs on the mirrored hosts
 //     (srcset candidates, every @font-face subset, favicons, og:image, search
 //     index, the Leaflet assets, unused default images, ...) and downloads them.
-//  3. Pre-fetches the OpenStreetMap tiles around every map location and the
-//     on-demand image sizes requested by the WebGL "waving image" component.
+//  3. Fetches the on-demand image sizes requested by the WebGL "waving image"
+//     component. Map tiles are NOT fetched here: OpenStreetMap forbids bulk
+//     downloading, so only the tiles a browser loaded while capture.js used
+//     the live map are kept (server.js sends other tiles to OpenStreetMap).
 //  4. Rewrites https://<mirrored host>/... to <origin>/<host>/... in all text
 //     files, strips Framer's analytics beacon and on-page editor bar, and writes
 //     site/manifest.json, which server.js uses to answer requests.
@@ -16,14 +18,13 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { SITE, ROUTES, NOT_FOUND_PROBE, MIRROR_HOSTS, ORIGIN_TOKEN, MAP } = require('./config');
+const { SITE, ROUTES, NOT_FOUND_PROBE, EXTRA_FILES, MIRROR_HOSTS, ORIGIN_TOKEN } = require('./config');
 
 const ROOT = path.resolve(__dirname, '..');
 const CAP = path.resolve(process.argv[2] || path.join(ROOT, '.capture'));
 const OUT = path.resolve(process.argv[3] || path.join(ROOT, 'site'));
 
 const CHROME_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
-const TILE_UA = 'rammandir-site-mirror/1.0 (one-time offline copy of the venue map tiles)';
 const IMAGE_ACCEPT = 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8';
 // Accept header of a browser without AVIF support (Safari before 16).
 const WEBP_ACCEPT = 'image/webp,image/png,image/svg+xml,image/*;q=0.8,video/*;q=0.8,*/*;q=0.5';
@@ -68,7 +69,7 @@ function sniffType(buf, headerType, key) {
   if (head === 'wOF2') return 'font/woff2';
   if (head === 'wOFF') return 'font/woff';
   const t = (headerType || '').split(';')[0].trim();
-  if (t && t !== 'application/octet-stream' && t !== 'text/html') return t === 'application/javascript' ? 'text/javascript' : t;
+  if (t && t !== 'application/octet-stream' && t !== 'text/html') return headerType.trim();
   const ext = path.extname(key.split('?')[0]).toLowerCase();
   return {
     '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
@@ -85,10 +86,15 @@ const isText = (type) => /^(text\/|application\/(javascript|json))/.test(type);
 const assets = new Map(); // key -> { body: Buffer, type }
 const failed = new Map(); // key -> reason
 
+// md5 of the "Access blocked" PNG that OpenStreetMap returns (with HTTP 200)
+// to clients that break its tile usage policy; never store it as a tile.
+const OSM_BLOCKED_MD5 = 'c069a15b2cc2d6b6f527ad09eb93c61a';
+
 for (const [u, meta] of Object.entries(capIndex)) {
   const key = keyOf(u);
   if (!key || meta.status !== 200) continue;
   const body = fs.readFileSync(path.join(CAP, 'bodies', meta.hash));
+  if (key.startsWith('tile.openstreetmap.org/') && crypto.createHash('md5').update(body).digest('hex') === OSM_BLOCKED_MD5) continue;
   assets.set(key, { body, type: sniffType(body, meta.type, key) });
 }
 
@@ -116,12 +122,11 @@ async function download(key, { fresh = false, accept = null, store = assets } = 
     store.set(key, { body, type: fs.readFileSync(cached + '.type', 'utf8') });
     return;
   }
-  const tile = key.startsWith('tile.openstreetmap.org/');
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
       const res = await fetch(remoteOf(key), {
         headers: {
-          'user-agent': tile ? TILE_UA : CHROME_UA,
+          'user-agent': CHROME_UA,
           accept: accept || acceptFor(key),
           referer: SITE + '/',
         },
@@ -230,32 +235,7 @@ function patchModule(key, js) {
 }
 
 // ---------------------------------------------------------------------------
-// Map tiles and on-demand image sizes
-
-function tileKeys() {
-  const points = new Map();
-  for (const [key, a] of assets) {
-    if (!a.type.includes('javascript')) continue;
-    for (const m of a.body.toString('utf8').matchAll(/coordinates:`(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)`/g)) {
-      points.set(`${m[1]},${m[2]}`, [Number(m[1]), Number(m[2])]);
-    }
-  }
-  if (!points.size) points.set('config', [MAP.lat, MAP.lng]);
-  const keys = [];
-  for (const [lat, lng] of points.values()) {
-    for (const z of MAP.zooms) {
-      const n = 2 ** z;
-      const px = ((lng + 180) / 360) * n * 256;
-      const rad = (lat * Math.PI) / 180;
-      const py = ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * n * 256;
-      const x0 = Math.floor((px - MAP.width / 2) / 256) - 1, x1 = Math.floor((px + MAP.width / 2) / 256) + 1;
-      const y0 = Math.floor((py - MAP.height / 2) / 256) - 1, y1 = Math.floor((py + MAP.height / 2) / 256) + 1;
-      for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) keys.push(`tile.openstreetmap.org/${z}/${x}/${y}.png`);
-    }
-  }
-  console.log(`  map locations: ${[...points.keys()].join(' | ')}`);
-  return keys;
-}
+// On-demand image sizes
 
 // The waving-image component requests "<image>?scale-down-to=N" with
 // N = clamp(ceil(canvasWidth * min(dpr, 2)), 160, 1024), so N depends on the
@@ -310,9 +290,19 @@ async function main() {
 
   // Leaflet builds these two icon URLs from marker-icon.png at runtime.
   const extra = ['unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png', 'unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'];
-  console.log('fetching leaflet icons, on-demand image sizes and map tiles');
+  console.log('fetching leaflet icons and on-demand image sizes');
   await downloadAll([...extra, ...scaleLadderKeys()]);
-  await downloadAll(tileKeys(), 4);
+  const tiles = [...assets.keys()].filter((k) => k.startsWith('tile.openstreetmap.org/'));
+  console.log(`map tiles captured by the browser: ${tiles.length}`);
+
+  // Headers of the pages and extra files (Last-Modified, Content-Type), and
+  // the extra files themselves (robots.txt, sitemap.xml).
+  const live = {};
+  for (const p of [...ROUTES.map((r) => r.path), ...EXTRA_FILES]) {
+    const res = await fetch(SITE + p, { headers: { 'user-agent': CHROME_UA } });
+    if (res.status !== 200) throw new Error(`${p}: HTTP ${res.status}`);
+    live[p] = { type: res.headers.get('content-type'), lastModified: res.headers.get('last-modified'), body: Buffer.from(await res.arrayBuffer()) };
+  }
   console.log('refreshing Framer images');
   await refreshImages();
   const avifKeys = [...assets].filter(([k, a]) => k.startsWith('framerusercontent.com/images/') && a.type === 'image/avif').map(([k]) => k);
@@ -322,13 +312,18 @@ async function main() {
   // Write the site.
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
-  const manifest = { originToken: ORIGIN_TOKEN, routes: {}, notFound: '404.html', assets: {} };
+  const manifest = { originToken: ORIGIN_TOKEN, routes: {}, files: {}, notFound: '404.html', assets: {} };
 
   for (const [file, html] of pageHtml) {
     const out = file === '404.html' ? rewrite(html) : rewrite(patchHtml(html));
     fs.writeFileSync(path.join(OUT, file), out);
   }
-  for (const r of ROUTES) manifest.routes[r.path] = { file: r.file, routeId: r.routeId };
+  for (const r of ROUTES) manifest.routes[r.path] = { file: r.file, type: live[r.path].type, lastModified: live[r.path].lastModified, routeId: r.routeId };
+  for (const p of EXTRA_FILES) {
+    const file = p.slice(1);
+    fs.writeFileSync(path.join(OUT, file), rewrite(live[p].body.toString('utf8')));
+    manifest.files[p] = { file, type: live[p].type, lastModified: live[p].lastModified };
+  }
 
   for (const key of [...assets.keys()].sort()) {
     const a = assets.get(key);
