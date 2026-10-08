@@ -3,8 +3,9 @@
 A self-hosted, offline copy of the Framer site published at
 https://rammandir.framer.website/. It is the site's own published output (HTML,
 Framer runtime modules, fonts, images, map tiles), served from this folder,
-with no requests to framer.website, Framer's CDNs, Google Fonts, unpkg,
-Unsplash or OpenStreetMap.
+with no requests to framer.website, Framer's CDNs, Google Fonts, unpkg or
+Unsplash. The only exception is the map: zooming or panning it beyond the
+stored views loads tiles from OpenStreetMap, as the live site does (see below).
 
 ## Run it
 
@@ -15,7 +16,8 @@ npm start            # or: node server.js
 ```
 
 Open http://localhost:8080/ (the second page is http://localhost:8080/page).
-Use `PORT=3000 npm start` for another port. The server listens on all
+Use `PORT=3000 npm start` for another port, and `OFFLINE=1 npm start` to make
+sure nothing is ever loaded from the internet. The server listens on all
 interfaces, so a phone on the same network can open `http://<your-ip>:8080/`.
 
 ## What's in here
@@ -24,15 +26,18 @@ interfaces, so a phone on the same network can open `http://<your-ip>:8080/`.
 | --- | --- |
 | `server.js` | Zero-dependency Node server for `site/` |
 | `site/index.html`, `site/page.html`, `site/404.html` | Pages for `/`, `/page` and unknown URLs |
+| `site/robots.txt`, `site/sitemap.xml` | Served at the site root, as on the Framer host |
 | `site/<host>/...` | Mirrored files, one folder per original host (`framerusercontent.com`, `fonts.gstatic.com`, ...) |
 | `site/manifest.json` | URL → file/content-type table used by the server |
 | `tools/` | Capture, build and verification scripts (only needed to refresh or re-verify the copy) |
 
 How the server answers requests:
 
-- `/` and `/page` serve the pages with the same `Server-Timing` route header as
-  the Framer host; `/page/` redirects to `/page` (308) and any other path gets
-  the 404 page with status 404, also as on the Framer host.
+- Routing copies the Framer host: `/` and `/page` (percent-decoded, query
+  ignored) serve the pages with the same `Server-Timing` route header,
+  `/page/` redirects to `/page` (308), other methods get 405, and unknown
+  paths get the 404 page, or a bare "Not found" for file-like names such as
+  `/favicon.ico` or `*.png`.
 - Mirrored files keep their original absolute URLs, with the external origin
   replaced by a placeholder that the server swaps for the origin you browse
   from. Framer's runtime parses image URLs with `new URL()`, so they must stay
@@ -55,10 +60,14 @@ These are deliberate and have no visible effect:
 
 These are limits of an offline copy:
 
-- **Map:** OpenStreetMap tiles are stored for zoom levels 11–18 around both
-  venue locations, covering the map's frame plus one tile. If you enable the map
-  (click it) and then pan far away or zoom out below 11, those areas show grey,
-  where the live site would fetch more tiles from OpenStreetMap.
+- **Map tiles:** the map draws OpenStreetMap tiles, a live third-party
+  service whose usage policy forbids bulk downloading. The clone stores the 71
+  tiles a browser loads while using the live map normally: both venue
+  locations at their default zoom (14), one step out (13) and two steps in
+  (15, 16). Those views work offline. For any other tile (further zoom, or
+  panning away) the server redirects the browser to `tile.openstreetmap.org`,
+  so with internet the map behaves exactly like the live one. Offline, or with
+  `OFFLINE=1`, those areas stay grey.
 - **External links:** the Google Maps directions link, the RSVP WhatsApp
   (`wa.me`) link and the "Made in Framer" badge link still point to those
   services, as they do on the live site. Opening them needs internet access.
@@ -68,7 +77,7 @@ These are limits of an offline copy:
 Requires Playwright with Chromium (`npm install && npx playwright install chromium`).
 
 ```sh
-node tools/capture.js        # load every route at 7 viewport/DPR combinations, save all responses to .capture/
+node tools/capture.js        # load every route at 7 viewport/DPR combinations and use the map; save all responses to .capture/
 node tools/build.js          # rebuild site/ from .capture/ (fetches anything referenced but not yet loaded)
 node tools/compare.js        # screenshot + DOM + network diff against the live site, into .verify/
 ```
