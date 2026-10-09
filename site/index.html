@@ -627,6 +627,29 @@ html.wl-loading body {
     
     <!-- End of headEnd -->
 	
+<style id="timeline-mobile">
+/* Wedding Timeline cards on phones and tablets: the event names, venues and times are
+   longer than the template's, so set all card text a little smaller on narrow
+   screens. Framer sizes text as font-size * --framer-font-size-scale, so this
+   scales every line together and keeps the layout and line positions. */
+@media (max-width: 1279.98px) {
+  [data-framer-name="2 — Wedding Timeline"] :is([data-framer-name="1"], [data-framer-name="2"], [data-framer-name="3"], [data-framer-name="4"], [data-framer-name="5"], [data-framer-name="6"]) {
+    --framer-font-size-scale: 0.86;
+  }
+}
+@media (max-width: 380px) {
+  [data-framer-name="2 — Wedding Timeline"] :is([data-framer-name="1"], [data-framer-name="2"], [data-framer-name="3"], [data-framer-name="4"], [data-framer-name="5"], [data-framer-name="6"]) {
+    --framer-font-size-scale: 0.8;
+  }
+}
+/* Tablets: the cards are proportionally narrower, so the event names need
+   a little more room. */
+@media (min-width: 768px) and (max-width: 1279.98px) {
+  [data-framer-name="2 — Wedding Timeline"] :is([data-framer-name="1"], [data-framer-name="2"], [data-framer-name="3"], [data-framer-name="4"], [data-framer-name="5"], [data-framer-name="6"]) p[style*="IvyOra Display Medium"] {
+    --framer-font-size-scale: 0.76;
+  }
+}
+</style>
 </head>
 <body>
 <div id="wl-loader" role="progressbar" aria-label="Loading the wedding invitation" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">

@@ -260,6 +260,8 @@ function customizations() {
       // RSVP card by reach.js once React has hydrated the page.
       html = mustReplace(html, /(<\/body>)/, `${read('reach.html')}<script>\n${read('reach.js')}</script>\n$1`, 'how to reach section');
       // "Son of" under the groom's name, laid out like the bride's "Daughter of".
+      // Smaller timeline card text on phones (the event details are longer than the template's).
+      html = mustReplace(html, /(<\/head>)/, `<style id="timeline-mobile">\n${read('timeline-mobile.css')}</style>\n$1`, 'timeline mobile styles');
       html = mustReplace(html, /(<\/body>)/, `<script id="son-of">\n${read('son-of.js')}</script>\n$1`, 'son of line');
       return html;
     },
