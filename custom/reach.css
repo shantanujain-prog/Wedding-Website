@@ -1,0 +1,140 @@
+/* "How to Reach" section, placed under the RSVP card by reach.js. The values
+   here are fallbacks: reach.js copies the typography, icon size, dividers,
+   ornament and button style from the site's own "Things to know" block and
+   map buttons, so the section matches them at every breakpoint.
+   --wl-s scales spacing with the heading size (1 = 60px desktop heading). */
+#wl-reach {
+  --wl-s: 1;
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Above the Framer sections (some have z-index 4 on phones); the section is
+     transparent, so the site's background and frame lines still show. */
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  color: rgb(95, 37, 15);
+  text-align: center;
+}
+#wl-reach[hidden] {
+  display: none;
+}
+#wl-reach .wl-reach-inner {
+  width: calc(100% - 32px);
+  max-width: 1160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#wl-reach .wl-reach-ornament {
+  display: block;
+  width: calc(var(--wl-s) * 524px);
+  max-width: 80%;
+  height: auto;
+}
+#wl-reach .wl-reach-ornament:not([src]) {
+  display: none;
+}
+#wl-reach .wl-reach-title {
+  margin: calc(var(--wl-s) * 10px) 0 0;
+  font-family: "IvyOra Display Medium", "IvyOra Display Medium Placeholder", Georgia, serif;
+  font-weight: 500;
+  font-size: 60px;
+  line-height: 1.2;
+  color: rgb(95, 37, 15);
+}
+#wl-reach .wl-reach-intro {
+  margin: calc(var(--wl-s) * 22px) 0 0;
+  max-width: calc(var(--wl-s) * 1060px);
+  font-family: "Gotham Book", "Gotham Book Placeholder", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.6;
+  letter-spacing: -0.02em;
+  color: rgb(95, 37, 15);
+  text-wrap: balance;
+}
+#wl-reach .wl-reach-row {
+  margin-top: calc(var(--wl-s) * 56px);
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  max-width: 100%;
+}
+#wl-reach .wl-reach-item {
+  flex: 0 1 218px;
+  width: 218px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(var(--wl-s) * 10px) 0;
+}
+#wl-reach .wl-reach-icon {
+  width: 99px;
+  height: 99px;
+  flex: none;
+  color: rgb(131, 75, 12);
+}
+#wl-reach .wl-reach-item-title {
+  margin: calc(var(--wl-s) * 12px) 0 0;
+  font-family: "IvyOra Display Medium", "IvyOra Display Medium Placeholder", Georgia, serif;
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.2;
+  color: rgb(95, 37, 15);
+}
+#wl-reach .wl-reach-item-text {
+  margin: calc(var(--wl-s) * 8px) 0 0;
+  max-width: 91%;
+  font-family: "IvyOra Display Regular", "IvyOra Display Regular Placeholder", Georgia, serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.2;
+  color: rgb(95, 37, 15);
+}
+#wl-reach .wl-reach-divider {
+  flex: none;
+  width: 3px;
+  margin: 0 calc(var(--wl-s) * 20px);
+  background: rgb(243, 212, 177);
+}
+#wl-reach .wl-reach-button {
+  margin-top: calc(var(--wl-s) * 44px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 36px;
+  border-radius: 12px;
+  background: rgb(179, 116, 67);
+  color: #fff;
+  font-family: Inter, "Inter Placeholder", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+#wl-reach .wl-reach-button::after {
+  content: "\2197";
+  font-size: 0.95em;
+}
+#wl-reach .wl-reach-button:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+#wl-reach .wl-reach-button:focus-visible {
+  outline: 2px solid rgb(221, 164, 93);
+  outline-offset: 3px;
+}
+
+/* Phones, when the site's own styles are not there to copy. */
+@media (max-width: 809.98px) {
+  #wl-reach .wl-reach-title { font-size: 31px; }
+  #wl-reach .wl-reach-intro { font-size: 12px; }
+  #wl-reach .wl-reach-icon { width: 46px; height: 46px; }
+  #wl-reach .wl-reach-item-title { font-size: 13px; }
+  #wl-reach .wl-reach-item-text { font-size: 8px; }
+}

@@ -238,7 +238,7 @@ function patchHtml(html) {
 }
 
 // Additions that are not part of the Framer site: the loader, background
-// music and mute button (sources in custom/). The song files get a content
+// music and mute button, and the "How to Reach" section (sources in custom/). The song files get a content
 // hash in their name, since the server lets browsers cache assets for a year.
 function customizations() {
   const read = (f) => fs.readFileSync(path.join(CUSTOM, f), 'utf8');
@@ -253,9 +253,12 @@ function customizations() {
   return {
     songs: Object.values(songs),
     apply(html) {
-      html = mustReplace(html, /(<meta name="viewport"[^>]*>)/, `$1\n<style id="wl-loader-css">\n${read('loader.css')}</style>`, 'loader styles');
+      html = mustReplace(html, /(<meta name="viewport"[^>]*>)/, `$1\n<style id="wl-loader-css">\n${read('loader.css')}\n${read('reach.css')}</style>`, 'loader styles');
       html = mustReplace(html, /(<body[^>]*>)/, `$1\n${read('loader.html')}<script>\n${script}</script>`, 'loader markup');
       html = mustReplace(html, /(<script data-framer-appear-animation=)/, `<script>\n${read('appear-recorder.js')}</script>$1`, 'appear recorder');
+      // "How to Reach" starts outside Framer's #main and is moved under the
+      // RSVP card by reach.js once React has hydrated the page.
+      html = mustReplace(html, /(<\/body>)/, `${read('reach.html')}<script>\n${read('reach.js')}</script>\n$1`, 'how to reach section');
       return html;
     },
   };

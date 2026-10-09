@@ -49,7 +49,7 @@ How the server answers requests:
 - The image CDN answers with AVIF or WebP depending on the browser's `Accept`
   header. Both versions are stored and the server makes the same choice.
 
-## Additions: loader and background music
+## Additions: loader, background music and How to Reach
 
 These are not on the live Framer site. Their sources live in `custom/`, and
 `tools/build.js` adds them to `/` and `/page` on every build:
@@ -90,6 +90,21 @@ These are not on the live Framer site. Their sources live in `custom/`, and
   ffmpeg -i new.mp3 -map 0:a:0 -map_metadata -1 -c:a libmp3lame -b:a 96k custom/wedding-song.mp3
   node tools/build.js --cached
   ```
+
+- **How to Reach** (`reach.html`, `reach.css`, `reach.js`): a section under
+  the RSVP card on both pages, at every screen size. It gives the venue
+  (Maghdham Grande Resort, Vidisha, Madhya Pradesh), travel by air (Raja
+  Bhoj Airport, Bhopal) and by train (Vidisha Railway Station), and says that
+  private vehicles are arranged from both on arrival. A **Get Directions**
+  button opens Google Maps. It uses the site's own look: the sunburst ornament,
+  the "Things to know" heading, text and icon styles (copied at runtime, so
+  they match every breakpoint), and the copper map buttons. Framer positions
+  everything absolutely, so `reach.js` waits until React has hydrated the page,
+  then inserts the section below the RSVP card, moves the content below it
+  down, and grows the page. A background picture that runs across that point
+  is split, and the gap is filled from the picture itself. It repeats this on
+  resize and when the layout changes breakpoint. To change the wording, edit
+  `custom/reach.html` and run `node tools/build.js --cached`.
 
 `node tools/build.js --pristine` builds the plain copy without these additions.
 Use it before running `tools/compare.js`. `--cached` rebuilds in about a second
