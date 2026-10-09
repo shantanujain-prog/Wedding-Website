@@ -28,6 +28,14 @@
  },
  "notFound": "404.html",
  "assets": {
+  "custom/wedding-song.f09cd4aa.webm": [
+   "custom/wedding-song.f09cd4aa.webm",
+   "audio/webm"
+  ],
+  "custom/wedding-song.78aa917f.mp3": [
+   "custom/wedding-song.78aa917f.mp3",
+   "audio/mpeg"
+  ],
   "fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800,900&display=swap": [
    "fonts.googleapis.com/css~family_Inter_300_400_500_600_700_800_900_display_swap.fa622df4",
    "text/css; charset=utf-8"

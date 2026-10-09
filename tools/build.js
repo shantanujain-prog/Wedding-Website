@@ -13,7 +13,10 @@
 //     files, strips Framer's analytics beacon and on-page editor bar, and writes
 //     site/manifest.json, which server.js uses to answer requests.
 //
-// Usage: NODE_USE_ENV_PROXY=1 node tools/build.js [captureDir=.capture] [outDir=site]
+//  5. Adds the site's own additions from custom/ (loader, background music
+//     and mute button) to the pages, unless --pristine is given.
+//
+// Usage: NODE_USE_ENV_PROXY=1 node tools/build.js [captureDir=.capture] [outDir=site] [--pristine] [--cached]
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -21,8 +24,14 @@ const crypto = require('crypto');
 const { SITE, ROUTES, NOT_FOUND_PROBE, EXTRA_FILES, MIRROR_HOSTS, ORIGIN_TOKEN } = require('./config');
 
 const ROOT = path.resolve(__dirname, '..');
-const CAP = path.resolve(process.argv[2] || path.join(ROOT, '.capture'));
-const OUT = path.resolve(process.argv[3] || path.join(ROOT, 'site'));
+const ARGS = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+const PRISTINE = process.argv.includes('--pristine');
+// --cached: reuse the last fetched images instead of asking the CDN again
+// (quick rebuilds when only custom/ changed).
+const CACHED = process.argv.includes('--cached');
+const CAP = path.resolve(ARGS[0] || path.join(ROOT, '.capture'));
+const OUT = path.resolve(ARGS[1] || path.join(ROOT, 'site'));
+const CUSTOM = path.join(ROOT, 'custom');
 
 const CHROME_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
 const IMAGE_ACCEPT = 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8';
@@ -153,7 +162,8 @@ async function refreshImages() {
   for (let pass = 1; pass <= 4; pass++) {
     const before = new Map(keys.map((k) => [k, assets.get(k)]));
     for (const k of keys) assets.delete(k);
-    await downloadAll(keys, 8, { fresh: true });
+    await downloadAll(keys, 8, { fresh: !CACHED });
+    if (CACHED) return;
     const changed = keys.filter((k) => {
       const a = before.get(k), b = assets.get(k);
       if (!b) { assets.set(k, a); return false; }
@@ -225,6 +235,30 @@ function patchHtml(html) {
   html = mustReplace(html, /\s*<script async src="https:\/\/events\.framer\.com\/script[^"]*"[^>]*><\/script>/, '', 'analytics script');
   html = mustReplace(html, /\s*<script>try\{if\(localStorage\.getItem\("__framer_force_showing_editorbar_since"\)\)[\s\S]*?<\/script>/, '', 'editor bar preload');
   return html;
+}
+
+// Additions that are not part of the Framer site: the loader, background
+// music and mute button (sources in custom/). The song files get a content
+// hash in their name, since the server lets browsers cache assets for a year.
+function customizations() {
+  const read = (f) => fs.readFileSync(path.join(CUSTOM, f), 'utf8');
+  const songs = {};
+  for (const [ext, type] of [['webm', 'audio/webm'], ['mp3', 'audio/mpeg']]) {
+    const body = fs.readFileSync(path.join(CUSTOM, `wedding-song.${ext}`));
+    const key = `custom/wedding-song.${sha1(body).slice(0, 8)}.${ext}`;
+    songs[ext] = { key, body, type };
+  }
+  const script = read('loader.js').split('__WL_SONG_WEBM__').join('/' + songs.webm.key).split('__WL_SONG_MP3__').join('/' + songs.mp3.key);
+  if (script.includes('__WL_SONG_')) throw new Error('unreplaced song placeholder in custom/loader.js');
+  return {
+    songs: Object.values(songs),
+    apply(html) {
+      html = mustReplace(html, /(<meta name="viewport"[^>]*>)/, `$1\n<style id="wl-loader-css">\n${read('loader.css')}</style>`, 'loader styles');
+      html = mustReplace(html, /(<body[^>]*>)/, `$1\n${read('loader.html')}<script>\n${script}</script>`, 'loader markup');
+      html = mustReplace(html, /(<script data-framer-appear-animation=)/, `<script>\n${read('appear-recorder.js')}</script>$1`, 'appear recorder');
+      return html;
+    },
+  };
 }
 
 function patchModule(key, js) {
@@ -310,16 +344,26 @@ async function main() {
   // again with such an Accept header and keep the answer when it differs.
   const imageKeys = [...assets.keys()].filter((k) => k.startsWith('framerusercontent.com/images/'));
   console.log(`fetching non-AVIF versions of ${imageKeys.length} images`);
-  await downloadAll(imageKeys, 8, { fresh: true, accept: WEBP_ACCEPT, store: webpAssets });
+  await downloadAll(imageKeys, 8, { fresh: !CACHED, accept: WEBP_ACCEPT, store: webpAssets });
 
   // Write the site.
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
   const manifest = { originToken: ORIGIN_TOKEN, routes: {}, files: {}, notFound: '404.html', assets: {} };
 
+  const custom = PRISTINE ? null : customizations();
   for (const [file, html] of pageHtml) {
-    const out = file === '404.html' ? rewrite(html) : rewrite(patchHtml(html));
+    let out = file === '404.html' ? rewrite(html) : rewrite(patchHtml(html));
+    // Inserted after rewrite(): custom/ files already use the origin token.
+    if (custom && file !== '404.html') out = custom.apply(out);
     fs.writeFileSync(path.join(OUT, file), out);
+  }
+  if (custom) {
+    for (const song of custom.songs) {
+      fs.mkdirSync(path.dirname(path.join(OUT, song.key)), { recursive: true });
+      fs.writeFileSync(path.join(OUT, song.key), song.body);
+      manifest.assets[song.key] = [song.key, song.type];
+    }
   }
   for (const r of ROUTES) manifest.routes[r.path] = { file: r.file, type: live[r.path].type, lastModified: live[r.path].lastModified, routeId: r.routeId };
   for (const p of EXTRA_FILES) {

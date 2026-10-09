@@ -1,0 +1,255 @@
+/* Wedding loader and music button. Inlined into the <head> of every page by
+   tools/build.js. Colours are taken from the site's own palette. */
+@font-face {
+  font-family: "WL IvyOra";
+  src: url("__CLONE_ORIGIN__/framerusercontent.com/assets/AJOxUfHbzm8hLnE4i9oMria0Bo.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "WL Gotham";
+  src: url("__CLONE_ORIGIN__/framerusercontent.com/assets/nTf7kWqWuaW0u54wOgNGSTii2iE.woff2") format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+
+:root {
+  --wl-maroon: rgb(95, 37, 15);
+  --wl-copper: rgb(171, 86, 38);
+  --wl-gold: rgb(221, 164, 93);
+  --wl-sand: rgb(228, 188, 131);
+  --wl-cream: rgb(255, 239, 226);
+}
+
+html.wl-loading,
+html.wl-loading body {
+  overflow: hidden !important;
+}
+
+#wl-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255, 250, 244, 0.95) 0, rgba(255, 239, 226, 0) 46%),
+    radial-gradient(ellipse at 50% 120%, rgba(221, 164, 93, 0.35), rgba(221, 164, 93, 0) 60%),
+    var(--wl-cream);
+  color: var(--wl-maroon);
+  opacity: 1;
+  transition: opacity 0.8s ease, visibility 0s linear 0.8s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Faint mandala lattice behind everything. */
+#wl-loader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%235F250F' stroke-width='1'%3E%3Ccircle cx='36' cy='36' r='14'/%3E%3Cpath d='M36 10c6 8 6 16 0 26c-6-10-6-18 0-26zM36 62c6-8 6-16 0-26c-6 10-6 18 0 26zM10 36c8-6 16-6 26 0c-10 6-18 6-26 0zM62 36c-8-6-16-6-26 0c10 6 18 6 26 0z'/%3E%3Ccircle cx='0' cy='0' r='6'/%3E%3Ccircle cx='72' cy='0' r='6'/%3E%3Ccircle cx='0' cy='72' r='6'/%3E%3Ccircle cx='72' cy='72' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 72px 72px;
+  pointer-events: none;
+}
+
+/* Marigold toran hanging from the top edge. */
+#wl-loader .wl-toran {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 86px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='86' viewBox='0 0 64 86'%3E%3Cpath d='M0 3Q32 20 64 3' fill='none' stroke='%23AB5626' stroke-width='1.6'/%3E%3Cpath d='M32 12V66' stroke='%23AB5626' stroke-width='1'/%3E%3Cg stroke-dasharray='1.8 1.2'%3E%3Ccircle cx='32' cy='22' r='5.5' fill='%23F6B23C' stroke='%23E8781E' stroke-width='3'/%3E%3Ccircle cx='32' cy='36' r='5' fill='%23F28B25' stroke='%23D85E14' stroke-width='3'/%3E%3Ccircle cx='32' cy='49' r='4.5' fill='%23F6B23C' stroke='%23E8781E' stroke-width='3'/%3E%3C/g%3E%3Cpath d='M32 60q6 9 0 22q-6-13 0-22z' fill='%236F8B3A'/%3E%3Cpath d='M32 63v17' stroke='%234E6A28' stroke-width='0.8'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center top;
+  transform-origin: top center;
+  animation: wl-sway 4s ease-in-out infinite alternate;
+  transition: transform 0.8s ease;
+}
+
+#wl-loader .wl-mandala {
+  position: relative;
+  width: min(62vw, 42vh, 320px);
+  aspect-ratio: 1;
+}
+#wl-loader .wl-mandala svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+#wl-loader .wl-spin {
+  transform-origin: 0 0;
+  animation: wl-spin 28s linear infinite;
+}
+#wl-loader .wl-spin-rev {
+  transform-origin: 0 0;
+  animation: wl-spin 40s linear infinite reverse;
+}
+#wl-loader #wl-progress {
+  transition: stroke-dashoffset 0.12s linear;
+}
+
+#wl-loader .wl-percent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "WL IvyOra", "IvyOra Display Regular", Georgia, "Times New Roman", serif;
+  font-size: clamp(26px, 8vw, 36px);
+  letter-spacing: 0.02em;
+  color: var(--wl-maroon);
+  font-variant-numeric: tabular-nums;
+}
+#wl-loader .wl-percent small {
+  font-size: 0.55em;
+  margin-left: 2px;
+  color: var(--wl-copper);
+}
+
+#wl-loader .wl-blessing {
+  position: relative;
+  margin: 0;
+  font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", "Kohinoor Devanagari", "Nirmala UI", "Mangal", serif;
+  font-size: clamp(20px, 5.6vw, 26px);
+  color: var(--wl-copper);
+  letter-spacing: 0.04em;
+}
+#wl-loader .wl-caption {
+  position: relative;
+  margin: -6px 0 0;
+  font-family: "WL Gotham", "Gotham Light", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 300;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(95, 37, 15, 0.65);
+}
+#wl-loader .wl-divider {
+  position: relative;
+  width: 140px;
+  height: 12px;
+  margin-top: -8px;
+}
+
+/* Exit: fade out, mandala blooms, toran lifts away. */
+#wl-loader.wl-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+#wl-loader.wl-done .wl-mandala {
+  transform: scale(1.12);
+  transition: transform 0.8s ease;
+}
+#wl-loader.wl-done .wl-toran {
+  transform: translateY(-100%);
+}
+
+@keyframes wl-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes wl-sway {
+  from { transform: rotate(-0.6deg); }
+  to { transform: rotate(0.6deg); }
+}
+
+/* Music button */
+#wl-music {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 2147483500;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1.5px solid var(--wl-gold);
+  border-radius: 50%;
+  background: rgba(255, 239, 226, 0.92);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(95, 37, 15, 0.18);
+  color: var(--wl-maroon);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+#wl-music.wl-visible {
+  opacity: 1;
+  transform: none;
+}
+#wl-music:hover {
+  box-shadow: 0 6px 18px rgba(95, 37, 15, 0.28);
+}
+#wl-music:focus-visible {
+  outline: 2px solid var(--wl-copper);
+  outline-offset: 3px;
+}
+/* Dotted mandala ring that turns while the song plays. */
+#wl-music::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1.5px dotted var(--wl-gold);
+  animation: wl-spin 9s linear infinite;
+  animation-play-state: paused;
+}
+#wl-music[aria-pressed="false"]::before {
+  animation-play-state: running;
+}
+#wl-music svg {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+#wl-music .wl-wave {
+  transform-origin: 9px 12px;
+  animation: wl-wave 1.2s ease-in-out infinite;
+}
+#wl-music .wl-wave + .wl-wave {
+  animation-delay: 0.3s;
+}
+#wl-music .wl-off {
+  display: none;
+}
+#wl-music[aria-pressed="true"] .wl-on {
+  display: none;
+}
+#wl-music[aria-pressed="true"] .wl-off {
+  display: inline;
+}
+/* Autoplay was blocked: glow gently until the visitor taps. */
+#wl-music.wl-waiting {
+  animation: wl-glow 1.8s ease-in-out infinite;
+}
+@keyframes wl-wave {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@keyframes wl-glow {
+  0%, 100% { box-shadow: 0 4px 14px rgba(95, 37, 15, 0.18), 0 0 0 0 rgba(221, 164, 93, 0.55); }
+  50% { box-shadow: 0 4px 14px rgba(95, 37, 15, 0.18), 0 0 0 9px rgba(221, 164, 93, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #wl-loader .wl-spin,
+  #wl-loader .wl-spin-rev,
+  #wl-loader .wl-toran,
+  #wl-music::before,
+  #wl-music .wl-wave,
+  #wl-music.wl-waiting {
+    animation: none;
+  }
+}

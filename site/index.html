@@ -5,6 +5,263 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
+<style id="wl-loader-css">
+/* Wedding loader and music button. Inlined into the <head> of every page by
+   tools/build.js. Colours are taken from the site's own palette. */
+@font-face {
+  font-family: "WL IvyOra";
+  src: url("__CLONE_ORIGIN__/framerusercontent.com/assets/AJOxUfHbzm8hLnE4i9oMria0Bo.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "WL Gotham";
+  src: url("__CLONE_ORIGIN__/framerusercontent.com/assets/nTf7kWqWuaW0u54wOgNGSTii2iE.woff2") format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+
+:root {
+  --wl-maroon: rgb(95, 37, 15);
+  --wl-copper: rgb(171, 86, 38);
+  --wl-gold: rgb(221, 164, 93);
+  --wl-sand: rgb(228, 188, 131);
+  --wl-cream: rgb(255, 239, 226);
+}
+
+html.wl-loading,
+html.wl-loading body {
+  overflow: hidden !important;
+}
+
+#wl-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255, 250, 244, 0.95) 0, rgba(255, 239, 226, 0) 46%),
+    radial-gradient(ellipse at 50% 120%, rgba(221, 164, 93, 0.35), rgba(221, 164, 93, 0) 60%),
+    var(--wl-cream);
+  color: var(--wl-maroon);
+  opacity: 1;
+  transition: opacity 0.8s ease, visibility 0s linear 0.8s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Faint mandala lattice behind everything. */
+#wl-loader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%235F250F' stroke-width='1'%3E%3Ccircle cx='36' cy='36' r='14'/%3E%3Cpath d='M36 10c6 8 6 16 0 26c-6-10-6-18 0-26zM36 62c6-8 6-16 0-26c-6 10-6 18 0 26zM10 36c8-6 16-6 26 0c-10 6-18 6-26 0zM62 36c-8-6-16-6-26 0c10 6 18 6 26 0z'/%3E%3Ccircle cx='0' cy='0' r='6'/%3E%3Ccircle cx='72' cy='0' r='6'/%3E%3Ccircle cx='0' cy='72' r='6'/%3E%3Ccircle cx='72' cy='72' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 72px 72px;
+  pointer-events: none;
+}
+
+/* Marigold toran hanging from the top edge. */
+#wl-loader .wl-toran {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 86px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='86' viewBox='0 0 64 86'%3E%3Cpath d='M0 3Q32 20 64 3' fill='none' stroke='%23AB5626' stroke-width='1.6'/%3E%3Cpath d='M32 12V66' stroke='%23AB5626' stroke-width='1'/%3E%3Cg stroke-dasharray='1.8 1.2'%3E%3Ccircle cx='32' cy='22' r='5.5' fill='%23F6B23C' stroke='%23E8781E' stroke-width='3'/%3E%3Ccircle cx='32' cy='36' r='5' fill='%23F28B25' stroke='%23D85E14' stroke-width='3'/%3E%3Ccircle cx='32' cy='49' r='4.5' fill='%23F6B23C' stroke='%23E8781E' stroke-width='3'/%3E%3C/g%3E%3Cpath d='M32 60q6 9 0 22q-6-13 0-22z' fill='%236F8B3A'/%3E%3Cpath d='M32 63v17' stroke='%234E6A28' stroke-width='0.8'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center top;
+  transform-origin: top center;
+  animation: wl-sway 4s ease-in-out infinite alternate;
+  transition: transform 0.8s ease;
+}
+
+#wl-loader .wl-mandala {
+  position: relative;
+  width: min(62vw, 42vh, 320px);
+  aspect-ratio: 1;
+}
+#wl-loader .wl-mandala svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+#wl-loader .wl-spin {
+  transform-origin: 0 0;
+  animation: wl-spin 28s linear infinite;
+}
+#wl-loader .wl-spin-rev {
+  transform-origin: 0 0;
+  animation: wl-spin 40s linear infinite reverse;
+}
+#wl-loader #wl-progress {
+  transition: stroke-dashoffset 0.12s linear;
+}
+
+#wl-loader .wl-percent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "WL IvyOra", "IvyOra Display Regular", Georgia, "Times New Roman", serif;
+  font-size: clamp(26px, 8vw, 36px);
+  letter-spacing: 0.02em;
+  color: var(--wl-maroon);
+  font-variant-numeric: tabular-nums;
+}
+#wl-loader .wl-percent small {
+  font-size: 0.55em;
+  margin-left: 2px;
+  color: var(--wl-copper);
+}
+
+#wl-loader .wl-blessing {
+  position: relative;
+  margin: 0;
+  font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", "Kohinoor Devanagari", "Nirmala UI", "Mangal", serif;
+  font-size: clamp(20px, 5.6vw, 26px);
+  color: var(--wl-copper);
+  letter-spacing: 0.04em;
+}
+#wl-loader .wl-caption {
+  position: relative;
+  margin: -6px 0 0;
+  font-family: "WL Gotham", "Gotham Light", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 300;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(95, 37, 15, 0.65);
+}
+#wl-loader .wl-divider {
+  position: relative;
+  width: 140px;
+  height: 12px;
+  margin-top: -8px;
+}
+
+/* Exit: fade out, mandala blooms, toran lifts away. */
+#wl-loader.wl-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+#wl-loader.wl-done .wl-mandala {
+  transform: scale(1.12);
+  transition: transform 0.8s ease;
+}
+#wl-loader.wl-done .wl-toran {
+  transform: translateY(-100%);
+}
+
+@keyframes wl-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes wl-sway {
+  from { transform: rotate(-0.6deg); }
+  to { transform: rotate(0.6deg); }
+}
+
+/* Music button */
+#wl-music {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 2147483500;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1.5px solid var(--wl-gold);
+  border-radius: 50%;
+  background: rgba(255, 239, 226, 0.92);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(95, 37, 15, 0.18);
+  color: var(--wl-maroon);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+#wl-music.wl-visible {
+  opacity: 1;
+  transform: none;
+}
+#wl-music:hover {
+  box-shadow: 0 6px 18px rgba(95, 37, 15, 0.28);
+}
+#wl-music:focus-visible {
+  outline: 2px solid var(--wl-copper);
+  outline-offset: 3px;
+}
+/* Dotted mandala ring that turns while the song plays. */
+#wl-music::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1.5px dotted var(--wl-gold);
+  animation: wl-spin 9s linear infinite;
+  animation-play-state: paused;
+}
+#wl-music[aria-pressed="false"]::before {
+  animation-play-state: running;
+}
+#wl-music svg {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+#wl-music .wl-wave {
+  transform-origin: 9px 12px;
+  animation: wl-wave 1.2s ease-in-out infinite;
+}
+#wl-music .wl-wave + .wl-wave {
+  animation-delay: 0.3s;
+}
+#wl-music .wl-off {
+  display: none;
+}
+#wl-music[aria-pressed="true"] .wl-on {
+  display: none;
+}
+#wl-music[aria-pressed="true"] .wl-off {
+  display: inline;
+}
+/* Autoplay was blocked: glow gently until the visitor taps. */
+#wl-music.wl-waiting {
+  animation: wl-glow 1.8s ease-in-out infinite;
+}
+@keyframes wl-wave {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@keyframes wl-glow {
+  0%, 100% { box-shadow: 0 4px 14px rgba(95, 37, 15, 0.18), 0 0 0 0 rgba(221, 164, 93, 0.55); }
+  50% { box-shadow: 0 4px 14px rgba(95, 37, 15, 0.18), 0 0 0 9px rgba(221, 164, 93, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #wl-loader .wl-spin,
+  #wl-loader .wl-spin-rev,
+  #wl-loader .wl-toran,
+  #wl-music::before,
+  #wl-music .wl-wave,
+  #wl-music.wl-waiting {
+    animation: none;
+  }
+}
+</style>
 	<meta name="generator" content="Framer d485f69">
 	<title>Ram Mandir | A Divine Wedding Theme</title>
     <link rel="canonical" href="__CLONE_ORIGIN__/"><meta property="og:url" content="__CLONE_ORIGIN__/"><meta name="description" content="A beautifully crafted wedding invitation inspired by the divine beauty of Ram Mandir. 🪷✨ ">
@@ -184,6 +441,311 @@
 	
 </head>
 <body>
+<div id="wl-loader" role="progressbar" aria-label="Loading the wedding invitation" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<div class="wl-toran" aria-hidden="true"></div>
+<div class="wl-mandala">
+<svg viewBox="-100 -100 200 200" aria-hidden="true" focusable="false">
+<defs>
+<path id="wl-p-out" d="M0,-60C9,-68 10,-80 0,-91C-10,-80 -9,-68 0,-60Z"/>
+<path id="wl-p-mid" d="M0,-41C13,-48 14,-61 0,-73C-14,-61 -13,-48 0,-41Z"/>
+<circle id="wl-dot" cx="0" cy="-95" r="1.8"/>
+<path id="wl-leaf" d="M0,-44C4,-49 4,-54 0,-58C-4,-54 -4,-49 0,-44Z"/>
+</defs>
+<g class="wl-spin">
+<circle r="95" fill="none" stroke="rgb(221,164,93)" stroke-width="0.8" stroke-dasharray="0.1 5.9" stroke-linecap="round" opacity="0.9"/>
+<g fill="rgb(221,164,93)"><use href="#wl-dot" transform="rotate(7.5)"/><use href="#wl-dot" transform="rotate(22.5)"/><use href="#wl-dot" transform="rotate(37.5)"/><use href="#wl-dot" transform="rotate(52.5)"/><use href="#wl-dot" transform="rotate(67.5)"/><use href="#wl-dot" transform="rotate(82.5)"/><use href="#wl-dot" transform="rotate(97.5)"/><use href="#wl-dot" transform="rotate(112.5)"/><use href="#wl-dot" transform="rotate(127.5)"/><use href="#wl-dot" transform="rotate(142.5)"/><use href="#wl-dot" transform="rotate(157.5)"/><use href="#wl-dot" transform="rotate(172.5)"/><use href="#wl-dot" transform="rotate(187.5)"/><use href="#wl-dot" transform="rotate(202.5)"/><use href="#wl-dot" transform="rotate(217.5)"/><use href="#wl-dot" transform="rotate(232.5)"/><use href="#wl-dot" transform="rotate(247.5)"/><use href="#wl-dot" transform="rotate(262.5)"/><use href="#wl-dot" transform="rotate(277.5)"/><use href="#wl-dot" transform="rotate(292.5)"/><use href="#wl-dot" transform="rotate(307.5)"/><use href="#wl-dot" transform="rotate(322.5)"/><use href="#wl-dot" transform="rotate(337.5)"/><use href="#wl-dot" transform="rotate(352.5)"/></g>
+<g fill="rgba(221,164,93,0.10)" stroke="rgb(221,164,93)" stroke-width="1.1"><use href="#wl-p-out" transform="rotate(0)"/><use href="#wl-p-out" transform="rotate(22.5)"/><use href="#wl-p-out" transform="rotate(45)"/><use href="#wl-p-out" transform="rotate(67.5)"/><use href="#wl-p-out" transform="rotate(90)"/><use href="#wl-p-out" transform="rotate(112.5)"/><use href="#wl-p-out" transform="rotate(135)"/><use href="#wl-p-out" transform="rotate(157.5)"/><use href="#wl-p-out" transform="rotate(180)"/><use href="#wl-p-out" transform="rotate(202.5)"/><use href="#wl-p-out" transform="rotate(225)"/><use href="#wl-p-out" transform="rotate(247.5)"/><use href="#wl-p-out" transform="rotate(270)"/><use href="#wl-p-out" transform="rotate(292.5)"/><use href="#wl-p-out" transform="rotate(315)"/><use href="#wl-p-out" transform="rotate(337.5)"/></g>
+<g fill="rgb(171,86,38)" opacity="0.55"><use href="#wl-leaf" transform="rotate(11.25)"/><use href="#wl-leaf" transform="rotate(33.75)"/><use href="#wl-leaf" transform="rotate(56.25)"/><use href="#wl-leaf" transform="rotate(78.75)"/><use href="#wl-leaf" transform="rotate(101.25)"/><use href="#wl-leaf" transform="rotate(123.75)"/><use href="#wl-leaf" transform="rotate(146.25)"/><use href="#wl-leaf" transform="rotate(168.75)"/><use href="#wl-leaf" transform="rotate(191.25)"/><use href="#wl-leaf" transform="rotate(213.75)"/><use href="#wl-leaf" transform="rotate(236.25)"/><use href="#wl-leaf" transform="rotate(258.75)"/><use href="#wl-leaf" transform="rotate(281.25)"/><use href="#wl-leaf" transform="rotate(303.75)"/><use href="#wl-leaf" transform="rotate(326.25)"/><use href="#wl-leaf" transform="rotate(348.75)"/></g>
+</g>
+<g class="wl-spin-rev">
+<g fill="rgba(228,188,131,0.28)" stroke="rgb(171,86,38)" stroke-width="1"><use href="#wl-p-mid" transform="rotate(0)"/><use href="#wl-p-mid" transform="rotate(30)"/><use href="#wl-p-mid" transform="rotate(60)"/><use href="#wl-p-mid" transform="rotate(90)"/><use href="#wl-p-mid" transform="rotate(120)"/><use href="#wl-p-mid" transform="rotate(150)"/><use href="#wl-p-mid" transform="rotate(180)"/><use href="#wl-p-mid" transform="rotate(210)"/><use href="#wl-p-mid" transform="rotate(240)"/><use href="#wl-p-mid" transform="rotate(270)"/><use href="#wl-p-mid" transform="rotate(300)"/><use href="#wl-p-mid" transform="rotate(330)"/></g>
+<circle r="39" fill="rgb(255,246,238)" stroke="rgb(221,164,93)" stroke-width="1"/>
+</g>
+<circle r="34" fill="none" stroke="rgba(95,37,15,0.12)" stroke-width="3"/>
+<circle id="wl-progress" r="34" fill="none" stroke="rgb(221,164,93)" stroke-width="3" stroke-linecap="round" stroke-dasharray="213.63" stroke-dashoffset="213.63" transform="rotate(-90)"/>
+</svg>
+<div class="wl-percent"><span id="wl-percent-value">0</span><small>%</small></div>
+</div>
+<p class="wl-blessing" lang="hi">॥ शुभ विवाह ॥</p>
+<svg class="wl-divider" viewBox="0 0 140 12" aria-hidden="true" focusable="false"><path d="M0 6H56M84 6H140" stroke="rgb(221,164,93)" stroke-width="1"/><path d="M70 1L75 6L70 11L65 6Z" fill="rgb(221,164,93)"/><circle cx="60" cy="6" r="1.6" fill="rgb(171,86,38)"/><circle cx="80" cy="6" r="1.6" fill="rgb(171,86,38)"/></svg>
+<p class="wl-caption">Preparing the celebration</p>
+</div>
+<script>
+/* Wedding loader (0-100% until the page has fully loaded) and background
+   music with a mute button. Inlined right after <body> by tools/build.js,
+   which also fills in the URLs of the two song files. */
+(function () {
+  'use strict';
+  var d = document;
+  var w = window;
+  var root = d.documentElement;
+  var loader = d.getElementById('wl-loader');
+  if (!loader) return;
+
+  // ---------------------------------------------------------------- loader
+
+  var ring = d.getElementById('wl-progress');
+  var label = d.getElementById('wl-percent-value');
+  var CIRC = 2 * Math.PI * 34;
+  var MIN_MS = 1600; // the counter never runs 0 -> 100 faster than this
+  var MAX_MS = 30000; // give up waiting for stragglers after this
+  var t0 = performance.now();
+  var last = t0;
+  var shown = 0;
+  var target = 0;
+  var images = null;
+  var loaded = d.readyState === 'complete';
+  var fontsReady = false;
+  var finished = false;
+
+  root.classList.add('wl-loading');
+
+  // No scrolling while the loader is up (the smooth-scroll component listens
+  // to wheel/touch events, so stop them before they reach it).
+  function blockScroll(e) {
+    if (!finished) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  }
+  function blockKeys(e) {
+    if (!finished && /^( |PageUp|PageDown|ArrowUp|ArrowDown|Home|End)$/.test(e.key)) blockScroll(e);
+  }
+  w.addEventListener('wheel', blockScroll, { capture: true, passive: false });
+  w.addEventListener('touchmove', blockScroll, { capture: true, passive: false });
+  w.addEventListener('keydown', blockKeys, true);
+
+  function collectImages() {
+    images = Array.prototype.filter.call(d.images, function (img) {
+      return img.loading !== 'lazy' || img.complete;
+    });
+  }
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', collectImages);
+  else collectImages();
+
+  function onLoad() {
+    loaded = true;
+    if (!images) collectImages();
+    (d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve()).then(function () {
+      fontsReady = true;
+    });
+  }
+  if (loaded) onLoad();
+  else w.addEventListener('load', onLoad);
+
+  // Progress: 0-30% while the page itself is parsed, 30-95% as its images
+  // arrive, 100% once the load event has fired and the fonts are ready. A
+  // slow climb towards 90% keeps the counter moving on slow connections.
+  function measure(now) {
+    if (loaded && fontsReady) return 100;
+    if (now - t0 > MAX_MS) return 100;
+    var creep = 90 * (1 - Math.exp(-(now - t0) / 6000));
+    if (!images) return Math.max(creep, 30 * (1 - Math.exp(-(now - t0) / 1500)));
+    var done = 0;
+    for (var i = 0; i < images.length; i++) if (images[i].complete) done++;
+    var p = Math.max(creep, 30 + 65 * (images.length ? done / images.length : 1));
+    return Math.min(loaded ? Math.max(p, 96) : p, 98);
+  }
+
+  function render(p) {
+    var v = Math.floor(p);
+    ring.style.strokeDashoffset = String(CIRC * (1 - p / 100));
+    if (label.textContent !== String(v)) {
+      label.textContent = String(v);
+      loader.setAttribute('aria-valuenow', String(v));
+    }
+  }
+
+  function tick(now) {
+    var dt = Math.min(100, now - last);
+    last = now;
+    target = Math.max(target, measure(now));
+    var step = Math.max(0.2, (target - shown) * 0.1);
+    shown = Math.min(target, shown + Math.min(step, (dt * 100) / MIN_MS));
+    render(shown);
+    if (shown >= 100) finish();
+    else requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // Framer plays the hero's entrance animations as soon as the HTML arrives,
+  // which is underneath the loader. appear-recorder.js records them; replay
+  // them now so visitors see the entrance when the loader lifts.
+  function replayEntrance() {
+    var records = w.__wlAppearRecords || [];
+    var vh = w.innerHeight;
+    for (var i = 0; i < records.length; i++) {
+      var r = records[i];
+      if (!r.el.isConnected) continue;
+      var box = r.el.getBoundingClientRect();
+      if (!box.width || box.bottom < 0 || box.top > vh) continue;
+      try {
+        r.el.animate(r.keyframes, { duration: r.duration, delay: r.delay, easing: r.easing, fill: 'backwards' });
+      } catch (e) {
+        /* keep the final state */
+      }
+    }
+  }
+
+  function finish() {
+    if (finished) return;
+    finished = true;
+    w.removeEventListener('wheel', blockScroll, true);
+    w.removeEventListener('touchmove', blockScroll, true);
+    w.removeEventListener('keydown', blockKeys, true);
+    root.classList.remove('wl-loading');
+    replayEntrance();
+    loader.classList.add('wl-done');
+    setTimeout(function () {
+      if (loader.parentNode) loader.parentNode.removeChild(loader);
+    }, 1000);
+    music.start();
+  }
+
+  // ----------------------------------------------------------------- music
+
+  var music = (function () {
+    var KEY = 'wl-music-muted';
+    var VOLUME = 0.7;
+    var audio = null;
+    var button = null;
+    var muted = false;
+    var resumeWhenVisible = false;
+    try {
+      muted = localStorage.getItem(KEY) === '1';
+    } catch (e) {
+      /* storage unavailable */
+    }
+
+    function remember() {
+      try {
+        if (muted) localStorage.setItem(KEY, '1');
+        else localStorage.removeItem(KEY);
+      } catch (e) {
+        /* storage unavailable */
+      }
+    }
+
+    function ensureAudio() {
+      if (audio) return audio;
+      audio = new Audio();
+      audio.loop = true;
+      audio.preload = 'auto';
+      audio.src = audio.canPlayType('audio/webm; codecs="opus"') ? '/custom/wedding-song.f09cd4aa.webm' : '/custom/wedding-song.78aa917f.mp3';
+      return audio;
+    }
+
+    var fading = 0;
+    function fadeIn() {
+      var start = performance.now();
+      var id = ++fading;
+      audio.volume = 0;
+      (function step() {
+        if (id !== fading) return;
+        var k = Math.max(0, Math.min(1, (performance.now() - start) / 2500));
+        audio.volume = VOLUME * k;
+        if (k < 1 && !audio.paused) setTimeout(step, 50);
+        else audio.volume = VOLUME;
+      })();
+    }
+
+    function update(waiting) {
+      if (!button) return;
+      button.setAttribute('aria-pressed', String(muted || waiting));
+      button.setAttribute('aria-label', muted || waiting ? 'Play music' : 'Mute music');
+      button.title = muted || waiting ? 'Play music' : 'Mute music';
+      button.classList.toggle('wl-waiting', !!waiting && !muted);
+    }
+
+    function play() {
+      ensureAudio();
+      var p = audio.play();
+      if (p && p.then) {
+        p.then(function () {
+          fadeIn();
+          update(false);
+          stopWaiting();
+        }).catch(function () {
+          // Autoplay blocked until the visitor interacts with the page (a
+          // refusal can also arrive after a later attempt already succeeded).
+          if (!audio.paused) return;
+          update(true);
+          waitForGesture();
+        });
+      } else {
+        update(false);
+      }
+    }
+
+    // Browsers only allow sound after a tap/click/key press, so if autoplay
+    // was refused, start on the visitor's first interaction.
+    var gestures = ['pointerdown', 'touchend', 'click', 'keydown'];
+    function onGesture(e) {
+      if (button && button.contains(e.target)) return; // the button handles itself
+      if (!muted) play();
+    }
+    function waitForGesture() {
+      gestures.forEach(function (t) {
+        d.addEventListener(t, onGesture, true);
+      });
+    }
+    function stopWaiting() {
+      gestures.forEach(function (t) {
+        d.removeEventListener(t, onGesture, true);
+      });
+    }
+
+    function toggle() {
+      var waiting = button.classList.contains('wl-waiting');
+      if (!muted && !waiting && audio && !audio.paused) {
+        muted = true;
+        audio.pause();
+        update(false);
+      } else {
+        muted = false;
+        play();
+      }
+      remember();
+    }
+
+    function createButton() {
+      button = d.createElement('button');
+      button.id = 'wl-music';
+      button.type = 'button';
+      button.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+        '<path d="M4 9.5h3.2L11.5 6v12l-4.3-3.5H4z" fill="currentColor" stroke="none"/>' +
+        '<g class="wl-on"><path class="wl-wave" d="M14.5 9.2a4 4 0 0 1 0 5.6"/><path class="wl-wave" d="M16.8 6.9a7.3 7.3 0 0 1 0 10.2"/></g>' +
+        '<g class="wl-off"><path d="M15 9.5l5 5M20 9.5l-5 5"/></g>' +
+        '</svg>';
+      button.addEventListener('click', toggle);
+      d.body.appendChild(button);
+      update(muted);
+      requestAnimationFrame(function () {
+        button.classList.add('wl-visible');
+      });
+    }
+
+    d.addEventListener('visibilitychange', function () {
+      if (!audio) return;
+      if (d.hidden && !audio.paused) {
+        resumeWhenVisible = true;
+        audio.pause();
+      } else if (!d.hidden && resumeWhenVisible && !muted) {
+        resumeWhenVisible = false;
+        play();
+      }
+    });
+
+    return {
+      start: function () {
+        createButton();
+        if (!muted) play();
+      },
+    };
+  })();
+})();
+</script>
 	<!-- Start of bodyStart -->
     
     <!-- End of bodyStart -->
@@ -231,7 +793,41 @@ silver crest kamote
 	<div id="__framer-badge-container"><!--$--><!--$--><!--$--><a class="framer-6jWyo framer-n0ccwk framer-v-n0ccwk framer-bmpgw8 __framer-badge" data-framer-appear-id="n0ccwk" data-framer-name="Light" data-nosnippet="true" style="will-change:transform;pointer-events:auto;opacity:0.001;transform:translateY(10px)" href="https://www.framer.com" rel="noopener" title="Create a free website with Framer, the website builder loved by startups, designers and agencies."><div class="framer-13yxzio" data-framer-name="Backdrop" style="background-color:rgb(255, 255, 255);border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;box-shadow:0px 0.6021873017743928px 1.5656869846134214px -1.5px rgba(0, 0, 0, 0.17), 0px 2.288533303243457px 5.950186588432988px -3px rgba(0, 0, 0, 0.14), 0px 10px 26px -4.5px rgba(0, 0, 0, 0.02)"></div><div class="framer-19yaanm" data-framer-name="Content" style="transform:translate(-50%, -50%)"><div class="framer-1kflzx5"><div data-framer-name="Logo" class="framer-hcsc7 framer-e50co" style="--1bd4d3i:rgb(0, 0, 0);--otdjsv:rgb(0, 0, 0);transform:translateX(-50%)"></div></div><!--$--><p style="position:absolute;transform:scale(0.001)">Create a free website with Framer, the website builder loved by startups, designers and agencies.</p><div data-framer-name="Text" class="framer-g7oZR framer-1um7t9d" style="--1bd4d3i:rgb(0, 0, 0);--otdjsv:rgb(0, 0, 0)"></div><!--/$--></div><div class="framer-j4ugry" data-framer-name="Bottom" style="mask:linear-gradient(180deg, rgba(0,0,0,0) 65%, rgba(0,0,0,1) 100%) add;-webkit-mask:linear-gradient(180deg, rgba(0,0,0,0) 65%, rgba(0,0,0,1) 100%) add;border-bottom-left-radius:11px;border-bottom-right-radius:11px;border-top-left-radius:11px;border-top-right-radius:11px;box-shadow:inset 0px 0px 0px 1px rgb(0, 0, 0);opacity:0.06"></div><div class="framer-jnuwbw" data-framer-name="Border" style="border-bottom-left-radius:11px;border-bottom-right-radius:11px;border-top-left-radius:11px;border-top-right-radius:11px;box-shadow:inset 0px 0px 0px 1px rgb(0, 0, 0);opacity:0.04"></div></a><!--/$--><!--/$--><!--/$--></div>
 	<script>var animator=(()=>{var L=(e,r,t)=>t>r?r:t<e?e:t;var U=()=>{};function _(e){let r;return()=>(r===void 0&&(r=e()),r)}var Q=e=>e;var D=e=>e*1e3,O=e=>e/1e3;var J=e=>Array.isArray(e)&&typeof e[0]=="number";var $=(e,r,t=10)=>{let o="",s=Math.max(Math.round(r/t),2);for(let i=0;i<s;i++)o+=Math.round(e(i/(s-1))*1e4)/1e4+", ";return`linear(${o.substring(0,o.length-2)})`};function j(e){let r=0,t=50,o=e.next(r);for(;!o.done&&r<2e4;)r+=t,o=e.next(r);return r>=2e4?1/0:r}function de(e,r=100,t){let o=t({...e,keyframes:[0,r]}),s=Math.min(j(o),2e4);return{type:"keyframes",ease:i=>o.next(s*i).value/r,duration:O(s)}}var d={stiffness:100,damping:10,mass:1,velocity:0,duration:800,bounce:.3,visualDuration:.3,restSpeed:{granular:.01,default:2},restDelta:{granular:.005,default:.5},minDuration:.01,maxDuration:10,minDamping:.05,maxDamping:1};function te(e,r){return e*Math.sqrt(1-r*r)}var ke=12;function Ie(e,r,t){let o=t;for(let s=1;s<ke;s++)o=o-e(o)/r(o);return o}var re=.001;function Be({duration:e=d.duration,bounce:r=d.bounce,velocity:t=d.velocity,mass:o=d.mass}){let s,i;U(e<=D(d.maxDuration),"Spring duration must be 10 seconds or less","spring-duration-limit");let n=1-r;n=L(d.minDamping,d.maxDamping,n),e=L(d.minDuration,d.maxDuration,O(e)),n<1?(s=m=>{let p=m*n,c=p*e,u=p-t,g=te(m,n),A=Math.exp(-c);return re-u/g*A},i=m=>{let c=m*n*e,u=c*t+t,g=Math.pow(n,2)*Math.pow(m,2)*e,A=Math.exp(-c),x=te(Math.pow(m,2),n);return(-s(m)+re>0?-1:1)*((u-g)*A)/x}):(s=m=>{let p=Math.exp(-m*e),c=(m-t)*e+1;return-re+p*c},i=m=>{let p=Math.exp(-m*e),c=(t-m)*(e*e);return p*c});let f=5/e,a=Ie(s,i,f);if(e=D(e),isNaN(a))return{stiffness:d.stiffness,damping:d.damping,duration:e};{let m=Math.pow(a,2)*o;return{stiffness:m,damping:n*2*Math.sqrt(o*m),duration:e}}}var Ke=["duration","bounce"],Ge=["stiffness","damping","mass"];function ge(e,r){return r.some(t=>e[t]!==void 0)}function Le(e){let r={velocity:d.velocity,stiffness:d.stiffness,damping:d.damping,mass:d.mass,isResolvedFromDuration:!1,...e};if(!ge(e,Ge)&&ge(e,Ke))if(r.velocity=0,e.visualDuration){let t=e.visualDuration,o=2*Math.PI/(t*1.2),s=o*o,i=2*L(.05,1,1-(e.bounce||0))*Math.sqrt(s);r={...r,mass:d.mass,stiffness:s,damping:i}}else{let t=Be({...e,velocity:0});r={...r,...t,mass:d.mass},r.isResolvedFromDuration=!0}return r}function E(e=d.visualDuration,r=d.bounce){let t=typeof e!="object"?{visualDuration:e,keyframes:[0,1],bounce:r}:e,{restSpeed:o,restDelta:s}=t,i=t.keyframes[0],n=t.keyframes[t.keyframes.length-1],f={done:!1,value:i},{stiffness:a,damping:m,mass:p,duration:c,velocity:u,isResolvedFromDuration:g}=Le({...t,velocity:-O(t.velocity||0)}),A=u||0,x=m/(2*Math.sqrt(a*p)),h=n-i,y=O(Math.sqrt(a/p)),F=Math.abs(h)<5;o||(o=F?d.restSpeed.granular:d.restSpeed.default),s||(s=F?d.restDelta.granular:d.restDelta.default);let w,V,M,G,Y,H;if(x<1)M=te(y,x),G=(A+x*y*h)/M,w=l=>{let T=Math.exp(-x*y*l);return n-T*(G*Math.sin(M*l)+h*Math.cos(M*l))},Y=x*y*G+h*M,H=x*y*h-G*M,V=l=>Math.exp(-x*y*l)*(Y*Math.sin(M*l)+H*Math.cos(M*l));else if(x===1){w=T=>n-Math.exp(-y*T)*(h+(A+y*h)*T);let l=A+y*h;V=T=>Math.exp(-y*T)*(y*l*T-A)}else{let l=y*Math.sqrt(x*x-1);w=v=>{let k=Math.exp(-x*y*v),P=Math.min(l*v,300);return n-k*((A+x*y*h)*Math.sinh(P)+l*h*Math.cosh(P))/l};let T=(A+x*y*h)/l,S=x*y*T-h*l,N=x*y*h-T*l;V=v=>{let k=Math.exp(-x*y*v),P=Math.min(l*v,300);return k*(S*Math.sinh(P)+N*Math.cosh(P))}}let Z={calculatedDuration:g&&c||null,velocity:l=>D(V(l)),next:l=>{if(!g&&x<1){let S=Math.exp(-x*y*l),N=Math.sin(M*l),v=Math.cos(M*l),k=n-S*(G*N+h*v),P=D(S*(Y*N+H*v));return f.done=Math.abs(P)<=o&&Math.abs(n-k)<=s,f.value=f.done?n:k,f}let T=w(l);if(g)f.done=l>=c;else{let S=D(V(l));f.done=Math.abs(S)<=o&&Math.abs(n-T)<=s}return f.value=f.done?n:T,f},toString:()=>{let l=Math.min(j(Z),2e4),T=$(S=>Z.next(l*S).value,l,30);return l+"ms "+T},toTransition:()=>{}};return Z}E.applyToOptions=e=>{let r=de(e,100,E);return e.ease=r.ease,e.duration=D(r.duration),e.type="keyframes",e};var ye=["transformPerspective","x","y","z","translateX","translateY","translateZ","scale","scaleX","scaleY","rotate","rotateX","rotateY","rotateZ","skew","skewX","skewY"],oe=new Set([...ye,"pathRotation"]);var Ae={};function he(e,r){let t=_(e);return()=>Ae[r]??t()}var Te=he(()=>{try{document.createElement("div").animate({opacity:0},{easing:"linear(0, 1)"})}catch{return!1}return!0},"linearEasing");var C=([e,r,t,o])=>`cubic-bezier(${e}, ${r}, ${t}, ${o})`;var ne={linear:"linear",ease:"ease",easeIn:"ease-in",easeOut:"ease-out",easeInOut:"ease-in-out",circIn:C([0,.65,.55,1]),circOut:C([.55,0,1,.45]),backIn:C([.31,.01,.66,-.59]),backOut:C([.33,1.53,.69,.99])};function ie(e,r){if(e)return typeof e=="function"?Te()?$(e,r):"ease-out":J(e)?C(e):Array.isArray(e)?e.map(t=>ie(t,r)||ne.easeOut):ne[e]}function W(e,r,t,{delay:o=0,duration:s=300,repeat:i=0,repeatType:n="loop",ease:f="easeOut",times:a}={},m=void 0){let p={[r]:t};a&&(p.offset=a);let c=ie(f,s);Array.isArray(c)&&(p.easing=c);let u={delay:o,duration:s,easing:Array.isArray(c)?"linear":c,fill:"both",iterations:i+1,direction:n==="reverse"?"alternate":"normal"};return m&&(u.pseudoElement=m),e.animate(p,u)}function Me(e){return e.replace(/([A-Z])/g,r=>`-${r.toLowerCase()}`)}var q="framerAppearId",ae="data-"+Me(q);function se(e){return e.props[ae]}var b=new Map,I=new Map;var B=(e,r)=>{let t=oe.has(r)?"transform":r;return`${e}: ${t}`};function pe(e,r,t){let o=B(e,r),s=b.get(o);if(!s)return null;let{animation:i,startTime:n}=s;function f(){window.MotionCancelOptimisedAnimation?.(e,r,t)}return i.onfinish=f,n===null||window.MotionHandoffIsComplete?.(e)?(f(),null):n}var X,K,me=new Set;function Re(){me.forEach(e=>{e.animation.play(),e.animation.startTime=e.startTime}),me.clear()}function fe(e,r,t,o,s){if(window.MotionIsMounted)return;let i=e.dataset[q];if(!i)return;window.MotionHandoffAnimation=pe;let n=B(i,r);K||(K=W(e,r,[t[0],t[0]],{duration:1e4,ease:"linear"}),b.set(n,{animation:K,startTime:null}),window.MotionHandoffAnimation=pe,window.MotionHasOptimisedAnimation=(a,m)=>{if(!a)return!1;if(!m)return I.has(a);let p=B(a,m);return!!b.get(p)},window.MotionHandoffMarkAsComplete=a=>{I.has(a)&&I.set(a,!0)},window.MotionHandoffIsComplete=a=>I.get(a)===!0,window.MotionCancelOptimisedAnimation=(a,m,p,c)=>{let u=B(a,m),g=b.get(u);g&&(p&&c===void 0?p.postRender(()=>{p.postRender(()=>{g.animation.cancel()})}):g.animation.cancel(),p&&c?(me.add(g),p.render(Re)):(b.delete(u),b.size||(window.MotionCancelOptimisedAnimation=void 0)))},window.MotionCheckAppearSync=(a,m,p)=>{let c=se(a);if(!c)return;let u=window.MotionHasOptimisedAnimation?.(c,m),g=a.props.values?.[m];if(!u||!g)return;let A=p.on("change",x=>{g.get()!==x&&(window.MotionCancelOptimisedAnimation?.(c,m),A())});return A});let f=()=>{K.cancel();let a=W(e,r,t,o);X===void 0&&(X=performance.now()),a.startTime=X,b.set(n,{animation:a,startTime:X}),s&&s(a)};I.set(i,!1),K.ready?K.ready.then(f).catch(Q):f()}var ce=["transformPerspective","x","y","z","translateX","translateY","translateZ","scale","scaleX","scaleY","rotate","rotateX","rotateY","rotateZ","skew","skewX","skewY"],ze={x:"translateX",y:"translateY",z:"translateZ",transformPerspective:"perspective"},Fe={translateX:"px",translateY:"px",translateZ:"px",x:"px",y:"px",z:"px",perspective:"px",transformPerspective:"px",rotate:"deg",rotateX:"deg",rotateY:"deg"};function be(e,r){let t=Fe[e];return!t||typeof r=="string"&&r.endsWith(t)?r:`${r}${t}`}function le(e){return ce.includes(e)}var Ne=(e,r)=>ce.indexOf(e)-ce.indexOf(r);function Ve({transform:e,transformKeys:r},t){let o={},s=!0,i="";r.sort(Ne);for(let n of r){let f=e[n],a=!0;typeof f=="number"?a=f===(n.startsWith("scale")?1:0):a=parseFloat(f)===0,a||(s=!1,i+=`${ze[n]||n}(${e[n]}) `),t&&(o[n]=e[n])}return i=i.trim(),t?i=t(o,i):s&&(i="none"),i}function ue(e,r){let t=new Set(Object.keys(e));for(let o in r)t.add(o);return Array.from(t)}function xe(e,r){let t=r-e.length;if(t<=0)return e;let o=new Array(t).fill(e[e.length-1]);return e.concat(o)}function R(e){return e*1e3}var De={duration:.001},z={opacity:1,scale:1,translateX:0,translateY:0,translateZ:0,x:0,y:0,z:0,rotate:0,rotateX:0,rotateY:0};function we(e,r,t,o,s){return t.delay&&(t.delay=R(t.delay)),t.type==="spring"?je(e,r,t,o,s):qe(e,r,t,o,s)}function $e(e,r,t){let o={},s=0,i=0;for(let n of ue(e,r)){let f=e[n]??z[n],a=r[n]??z[n];if(f===void 0||a===void 0||n!=="transformPerspective"&&f===a&&f===z[n])continue;n==="transformPerspective"&&(o[n]=[f,a]);let m=Ue(f,a,t),{duration:p,keyframes:c}=m;p===void 0||c===void 0||(p>s&&(s=p,i=c.length),o[n]=c)}return{keyframeValuesByProps:o,longestDuration:s,longestLength:i}}function je(e,r,t,o,s){let i={},{keyframeValuesByProps:n,longestDuration:f,longestLength:a}=$e(e,r,t);if(!a)return i;let m={ease:"linear",duration:f,delay:t.delay},p=s?De:m,c={};for(let[g,A]of Object.entries(n))le(g)?c[g]=xe(A,a):i[g]={keyframes:xe(A,a),options:g==="opacity"?m:p};let u=Oe(c,o);return u&&(i.transform={keyframes:u,options:p}),i}function We(e){let{type:r,duration:t,...o}=e;return{duration:R(t),...o}}function qe(e,r,t,o,s){let i=We(t);if(!i)return;let n={},f=s?De:i,a={};for(let p of ue(e,r)){let c=e[p]??z[p],u=r[p]??z[p];c===void 0||u===void 0||p!=="transformPerspective"&&c===u||(le(p)?a[p]=[c,u]:n[p]={keyframes:[c,u],options:p==="opacity"?i:f})}let m=Oe(a,o);return m&&(n.transform={keyframes:m,options:f}),n}var Xe=["duration","bounce"],Ye=["stiffness","damping","mass"];function Pe(e){return Ye.some(r=>r in e)?!1:Xe.some(r=>r in e)}function He(e,r,t){return Pe(t)?`${e}-${r}-${t.duration}-${t.bounce}`:`${e}-${r}-${t.damping}-${t.stiffness}-${t.mass}`}function Ze(e){return Pe(e)?{...e,duration:R(e.duration)}:e}var Se=new Map,ve=10;function Ue(e,r,t){let o=He(e,r,t),s=Se.get(o);if(s)return s;let i=[e,r],n=E({...Ze(t),keyframes:i}),f={done:!1,value:i[0]},a=[],m=0;for(;!f.done&&m<R(10);)f=n.next(m),a.push(f.value),m+=ve;i=a;let p=m-ve,u={keyframes:i,duration:p,ease:"linear"};return Se.set(o,u),u}function Oe(e,r){let t=[],o=Object.values(e)[0]?.length;if(!o)return;let s=Object.keys(e);for(let i=0;i<o;i++){let n={};for(let[a,m]of Object.entries(e)){let p=m[i];p!==void 0&&(n[a]=be(a,p))}let f=Ve({transform:n,transformKeys:s},r);t.push(f)}return t}function _e(e,r){if(!r)for(let t in e){let o=e[t];return o?.legacy===!0?o:void 0}}function Ee(e,r,t,o,s,i){for(let[n,f]of Object.entries(e)){let a=i?f[i]:void 0;if(a===null||!a&&f.default===null)continue;let m=a??f.default??_e(f,i);if(!m)continue;let{initial:p,animate:c,transformTemplate:u}=m;if(!p||!c)continue;let{transition:g,...A}=c,x=we(p,A,g,Qe(u,o),s);if(!x)continue;let h={},y={};for(let[w,V]of Object.entries(x))h[w]=V.keyframes,y[w]=V.options;let F=i?`:not(.hidden-${i}) `:"";r(`${F}[${t}="${n}"]`,h,y)}}function Qe(e,r){if(!(!e||!r))return(t,o)=>e.replace(r,o)}function Ce(e){return e?e.find(t=>t.mediaQuery?window.matchMedia(t.mediaQuery).matches===!0:!1)?.hash:void 0}var Dt={animateAppearEffects:Ee,getActiveVariantHash:Ce,spring:E,startOptimizedAppearAnimation:fe};return Dt})()</script>
                 <script type="framer/appear" id="__framer__appearAnimationsContent">{"1w0sfru":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.7,"duration":2,"type":"spring"},"x":0,"y":0}}},"1xa7mer":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.7,"duration":2,"type":"spring"},"x":0,"y":0}}},"3hovmw":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.7,"duration":2,"type":"spring"},"x":0,"y":0}}},"luvd5":{"default":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"k2tod6":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"11v2ks5":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"bsay70":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"flz1ju":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1tc0fsl":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1b8a3mn":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"vlymnr":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"7902is":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"sdmwty":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1tqqkff":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1kw8tgm":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1cx7v4z":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"zeltxf":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1kglzlv":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}}},"kzkqz9":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.7,"duration":2,"type":"spring"},"x":0,"y":0}}},"k4dhgx":{"default":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"7902is":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"sdmwty":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"1tqqkff":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"k2tod6":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"11v2ks5":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"1kw8tgm":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"1cx7v4z":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"zeltxf":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"1kglzlv":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"1tc0fsl":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"1b8a3mn":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"bsay70":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"flz1ju":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.2,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"},"vlymnr":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.6,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1.2,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.1,"type":"spring"},"x":0,"y":0},"transformTemplate":"translateX(-50%) __Appear_Animation_Transform__"}},"12jygvc":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":1.5,"duration":1.5,"type":"spring"},"x":0,"y":0}}},"axskc8":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":1.5,"duration":1.5,"type":"spring"},"x":0,"y":0}}},"556qa9":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":1.7,"duration":1.5,"type":"spring"},"x":0,"y":0}}},"1sl8bfq":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":1.7,"duration":1.5,"type":"spring"},"x":0,"y":0}}},"17r56f2":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":2,"duration":1.5,"type":"spring"},"x":0,"y":0}}},"1516w3j":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":2,"duration":1.5,"type":"spring"},"x":0,"y":0}}},"uz89dr":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.7,"duration":2,"type":"spring"},"x":0,"y":0}}},"1s9f5jv":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.7,"duration":2,"type":"spring"},"x":0,"y":0}}},"1wcqky8":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.7,"duration":2,"type":"spring"},"x":0,"y":0}}},"1uhcg0a":{"default":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"7902is":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"sdmwty":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1tqqkff":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1kw8tgm":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"bsay70":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1cx7v4z":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"zeltxf":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"flz1ju":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1kglzlv":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1b8a3mn":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"vlymnr":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"k2tod6":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"11v2ks5":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}},"1tc0fsl":{"initial":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":2.3,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.1,"duration":2.5,"type":"spring"},"x":0,"y":0}}},"ldqgai":{"default":{"initial":{"opacity":0.001,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"x":0,"y":0},"animate":{"opacity":1,"rotate":0,"rotateX":0,"rotateY":0,"scale":1,"skewX":0,"skewY":0,"transition":{"bounce":0,"delay":0.7,"duration":2,"type":"spring"},"x":0,"y":0}}}}</script>
-                <script type="framer/appear" id="__framer__breakpoints">[{"hash":"flz1ju","mediaQuery":"(min-width: 1920px)"},{"hash":"vlymnr","mediaQuery":"(min-width: 1728px) and (max-width: 1919.98px)"},{"hash":"bsay70","mediaQuery":"(min-width: 1559px) and (max-width: 1727.98px)"},{"hash":"72rtr7","mediaQuery":"(min-width: 1349px) and (max-width: 1558.98px)"},{"hash":"1b8a3mn","mediaQuery":"(min-width: 1280px) and (max-width: 1348.98px)"},{"hash":"1tc0fsl","mediaQuery":"(min-width: 960px) and (max-width: 1279.98px)"},{"hash":"k2tod6","mediaQuery":"(min-width: 834px) and (max-width: 959.98px)"},{"hash":"11v2ks5","mediaQuery":"(min-width: 768px) and (max-width: 833.98px)"},{"hash":"sdmwty","mediaQuery":"(min-width: 430px) and (max-width: 767.98px)"},{"hash":"1kglzlv","mediaQuery":"(min-width: 412px) and (max-width: 429.98px)"},{"hash":"zeltxf","mediaQuery":"(min-width: 393px) and (max-width: 411.98px)"},{"hash":"1cx7v4z","mediaQuery":"(min-width: 390px) and (max-width: 392.98px)"},{"hash":"1tqqkff","mediaQuery":"(min-width: 375px) and (max-width: 389.98px)"},{"hash":"7902is","mediaQuery":"(min-width: 360px) and (max-width: 374.98px)"},{"hash":"1kw8tgm","mediaQuery":"(max-width: 359.98px)"}]</script><script data-framer-appear-animation="no-preference">(()=>{function c(i,o,s){if(window.__framer_disable_appear_effects_optimization__||typeof animator>"u")return;let e={detail:{bg:document.hidden}};requestAnimationFrame(()=>{let a="framer-appear-start";performance.mark(a,e),animator.animateAppearEffects(JSON.parse(window.__framer__appearAnimationsContent.text),(m,p,d)=>{let t=document.querySelector(m);if(t)for(let[r,f]of Object.entries(p))animator.startOptimizedAppearAnimation(t,r,f,d[r])},i,o,s&&window.matchMedia("(prefers-reduced-motion:reduce)").matches===!0,animator.getActiveVariantHash(JSON.parse(window.__framer__breakpoints.text)));let n="framer-appear-end";performance.mark(n,e),performance.measure("framer-appear",{start:a,end:n,detail:e.detail})})}return c})()("data-framer-appear-id","__Appear_Animation_Transform__",false)</script>
+                <script type="framer/appear" id="__framer__breakpoints">[{"hash":"flz1ju","mediaQuery":"(min-width: 1920px)"},{"hash":"vlymnr","mediaQuery":"(min-width: 1728px) and (max-width: 1919.98px)"},{"hash":"bsay70","mediaQuery":"(min-width: 1559px) and (max-width: 1727.98px)"},{"hash":"72rtr7","mediaQuery":"(min-width: 1349px) and (max-width: 1558.98px)"},{"hash":"1b8a3mn","mediaQuery":"(min-width: 1280px) and (max-width: 1348.98px)"},{"hash":"1tc0fsl","mediaQuery":"(min-width: 960px) and (max-width: 1279.98px)"},{"hash":"k2tod6","mediaQuery":"(min-width: 834px) and (max-width: 959.98px)"},{"hash":"11v2ks5","mediaQuery":"(min-width: 768px) and (max-width: 833.98px)"},{"hash":"sdmwty","mediaQuery":"(min-width: 430px) and (max-width: 767.98px)"},{"hash":"1kglzlv","mediaQuery":"(min-width: 412px) and (max-width: 429.98px)"},{"hash":"zeltxf","mediaQuery":"(min-width: 393px) and (max-width: 411.98px)"},{"hash":"1cx7v4z","mediaQuery":"(min-width: 390px) and (max-width: 392.98px)"},{"hash":"1tqqkff","mediaQuery":"(min-width: 375px) and (max-width: 389.98px)"},{"hash":"7902is","mediaQuery":"(min-width: 360px) and (max-width: 374.98px)"},{"hash":"1kw8tgm","mediaQuery":"(max-width: 359.98px)"}]</script><script>
+/* Records the entrance ("appear") animations Framer starts while the loader
+   is covering the page, so loader.js can replay them when it lifts. Inlined
+   by tools/build.js right before Framer's appear script, after `animator`
+   is defined. Framer creates the real animations a frame later and hands
+   each one to an optional callback, which is where they are recorded.
+   Framer's own animations are left untouched. */
+(function () {
+  'use strict';
+  if (typeof animator === 'undefined' || !animator.startOptimizedAppearAnimation) return;
+  var records = (window.__wlAppearRecords = []);
+  var start = animator.startOptimizedAppearAnimation;
+  animator.startOptimizedAppearAnimation = function (el, name, keyframes, options, onStart) {
+    return start.call(this, el, name, keyframes, options, function (animation) {
+      try {
+        var timing = animation.effect.getTiming();
+        records.push({
+          el: el,
+          keyframes: animation.effect.getKeyframes().map(function (k) {
+            var copy = {};
+            for (var p in k) if (p !== 'computedOffset' && p !== 'composite') copy[p] = k[p];
+            return copy;
+          }),
+          duration: timing.duration,
+          delay: timing.delay,
+          easing: timing.easing,
+        });
+      } catch (e) {
+        /* recording is best effort */
+      }
+      if (onStart) onStart(animation);
+    });
+  };
+})();
+</script><script data-framer-appear-animation="no-preference">(()=>{function c(i,o,s){if(window.__framer_disable_appear_effects_optimization__||typeof animator>"u")return;let e={detail:{bg:document.hidden}};requestAnimationFrame(()=>{let a="framer-appear-start";performance.mark(a,e),animator.animateAppearEffects(JSON.parse(window.__framer__appearAnimationsContent.text),(m,p,d)=>{let t=document.querySelector(m);if(t)for(let[r,f]of Object.entries(p))animator.startOptimizedAppearAnimation(t,r,f,d[r])},i,o,s&&window.matchMedia("(prefers-reduced-motion:reduce)").matches===!0,animator.getActiveVariantHash(JSON.parse(window.__framer__breakpoints.text)));let n="framer-appear-end";performance.mark(n,e),performance.measure("framer-appear",{start:a,end:n,detail:e.detail})})}return c})()("data-framer-appear-id","__Appear_Animation_Transform__",false)</script>
 	<script>typeof document<"u"&&(window.process={...window.process,env:{...window.process?.env,NODE_ENV:"production"}});</script>
 	<link rel="modulepreload" fetchpriority="low" href="__CLONE_ORIGIN__/framerusercontent.com/sites/Yfcd4lazaeyFqLtKuCnx5/rolldown-runtime.Dh6celcD.mjs"><link rel="modulepreload" fetchpriority="low" href="__CLONE_ORIGIN__/framerusercontent.com/sites/Yfcd4lazaeyFqLtKuCnx5/react.iNMCLRE-.mjs"><link rel="modulepreload" fetchpriority="low" href="__CLONE_ORIGIN__/framerusercontent.com/sites/Yfcd4lazaeyFqLtKuCnx5/framer.Dx9h354S.mjs"><link rel="modulepreload" fetchpriority="low" href="__CLONE_ORIGIN__/framerusercontent.com/sites/Yfcd4lazaeyFqLtKuCnx5/motion.xhvfJrUr.mjs"><link rel="modulepreload" fetchpriority="low" href="__CLONE_ORIGIN__/framerusercontent.com/sites/Yfcd4lazaeyFqLtKuCnx5/7MF8aTbFRWXG43lkM7ubYYLJiZSapiOiPxv2o2Y_shU.YDJfG8pH.mjs"><link rel="modulepreload" fetchpriority="low" href="__CLONE_ORIGIN__/framerusercontent.com/sites/Yfcd4lazaeyFqLtKuCnx5/shared-lib.lQ8MAyCz.mjs"><script type="module" async data-framer-bundle="main" fetchpriority="low" src="__CLONE_ORIGIN__/framerusercontent.com/sites/Yfcd4lazaeyFqLtKuCnx5/script_main.Vqzu72un.mjs"></script><div id="svg-templates" style="position: absolute; overflow: hidden; bottom: 0; left: 0; width: 0; height: 0; z-index: 0; contain: strict" aria-hidden="true">
 </div>

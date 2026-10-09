@@ -29,6 +29,7 @@ interfaces, so a phone on the same network can open `http://<your-ip>:8080/`.
 | `site/robots.txt`, `site/sitemap.xml` | Served at the site root, as on the Framer host |
 | `site/<host>/...` | Mirrored files, one folder per original host (`framerusercontent.com`, `fonts.gstatic.com`, ...) |
 | `site/manifest.json` | URL → file/content-type table used by the server |
+| `custom/` | Loader, background music and mute button added on top of the Framer site (see below) |
 | `tools/` | Capture, build and verification scripts (only needed to refresh or re-verify the copy) |
 
 How the server answers requests:
@@ -47,6 +48,47 @@ How the server answers requests:
   stored, the next larger stored size is served.
 - The image CDN answers with AVIF or WebP depending on the browser's `Accept`
   header. Both versions are stored and the server makes the same choice.
+
+## Additions: loader and background music
+
+These are not on the live Framer site. Their sources live in `custom/`, and
+`tools/build.js` adds them to `/` and `/page` on every build:
+
+- **Loader** (`loader.html`, `loader.css`, `loader.js`): an ethnic-style
+  full-screen loader with a marigold toran, a slowly turning mandala, and a
+  gold progress ring counting 0 → 100% in the site's display font. The count
+  follows the page loading for real: the document being parsed, the
+  above-the-fold images arriving, then the browser's `load` event plus web
+  fonts. On slow connections it keeps creeping forward, and it never shows
+  100% before the page has finished loading. Scrolling is held until it
+  lifts.
+- **Hero entrance:** Framer plays the hero's entrance animation (the temple
+  and bells zooming in, the bells fading in) as soon as the HTML arrives,
+  which is behind the loader. `appear-recorder.js` records those animations
+  exactly as Framer starts them, and the loader replays them as it fades out.
+- **Music:** the song starts when the loader finishes and loops forever. A
+  round button in the bottom-left corner mutes and unmutes it. The choice is
+  remembered on that device, and the song pauses while the tab is hidden.
+  The song is only downloaded after the page has loaded, so it never slows
+  the loader. Browsers block sound until the visitor has interacted with the
+  page. If they block it, the button glows, and the song starts on the
+  visitor's first tap, click or key press anywhere (scrolling alone does not
+  count).
+- **Song files** (`wedding-song.webm`, Opus 64 kbps, 2.4 MB, and
+  `wedding-song.mp3`, MP3 96 kbps, 3.1 MB): each browser downloads only one,
+  Opus where it is supported (Chrome, Firefox, Android) and MP3 elsewhere
+  (Safari). The original upload was a 4.3 MB 128 kbps MP3 with embedded
+  cover art and 3 seconds of trailing silence. To replace the song:
+
+  ```sh
+  ffmpeg -i new.mp3 -map 0:a:0 -map_metadata -1 -c:a libopus -b:a 64k custom/wedding-song.webm
+  ffmpeg -i new.mp3 -map 0:a:0 -map_metadata -1 -c:a libmp3lame -b:a 96k custom/wedding-song.mp3
+  node tools/build.js --cached
+  ```
+
+`node tools/build.js --pristine` builds the plain copy without these additions.
+Use it before running `tools/compare.js`. `--cached` rebuilds in about a second
+from the last downloaded files, without asking the CDN again.
 
 ## Differences from the live site
 
