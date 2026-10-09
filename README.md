@@ -66,18 +66,23 @@ These are not on the live Framer site. Their sources live in `custom/`, and
   and bells zooming in, the bells fading in) as soon as the HTML arrives,
   which is behind the loader. `appear-recorder.js` records those animations
   exactly as Framer starts them, and the loader replays them as it fades out.
-- **Music:** the song starts when the loader finishes and loops forever. A
-  round button in the bottom-left corner mutes and unmutes it. The choice is
-  remembered on that device, and the song pauses while the tab is hidden.
-  The song is only downloaded after the page has loaded, so it never slows
-  the loader. Browsers block sound until the visitor has interacted with the
-  page. If they block it, the button glows, and the song starts on the
-  visitor's first tap, click or key press anywhere (scrolling alone does not
-  count).
+- **Music:** browsers refuse to play sound until the visitor has tapped,
+  clicked or pressed a key on the page, so at 100% the loader first asks the
+  browser to start the song:
+  - if the browser allows it, the site opens with the song already playing;
+  - if not (the usual case on a first visit), the loader shows an **Open
+    Invitation** button. Tapping it, or anywhere on the loader, or pressing
+    Enter, opens the site and starts the song together.
+
+  The song loops forever, fading in to 70% volume. A round button in the
+  bottom-left corner mutes and unmutes it. The choice is remembered on that
+  device: a visitor who muted it skips the button next time. The song pauses
+  while the tab is hidden. It is only downloaded once the page has loaded, so
+  it never slows the loader.
 - **Song files** (`wedding-song.webm`, Opus 64 kbps, 2.4 MB, and
   `wedding-song.mp3`, MP3 96 kbps, 3.1 MB): each browser downloads only one,
-  Opus where it is supported (Chrome, Firefox, Android) and MP3 elsewhere
-  (Safari). The original upload was a 4.3 MB 128 kbps MP3 with embedded
+  Opus where the browser is sure it can play it (Chrome, Firefox, Android) and
+  MP3 elsewhere (Safari). If the Opus file fails to load, it switches to the MP3. The original upload was a 4.3 MB 128 kbps MP3 with embedded
   cover art and 3 seconds of trailing silence. To replace the song:
 
   ```sh

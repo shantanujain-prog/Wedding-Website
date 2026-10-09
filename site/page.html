@@ -147,6 +147,52 @@ html.wl-loading body {
   margin-top: -8px;
 }
 
+/* "Open Invitation": shown at 100% when the browser needs a tap before it
+   will play the song. The whole loader is clickable at that point. */
+#wl-loader.wl-ready {
+  cursor: pointer;
+}
+#wl-loader .wl-open {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 12px 28px 12px 22px;
+  border: 1.5px solid var(--wl-gold);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 251, 246, 0.96), rgba(255, 234, 210, 0.96));
+  box-shadow: 0 6px 18px rgba(95, 37, 15, 0.15), inset 0 0 0 3px rgba(255, 255, 255, 0.55);
+  color: var(--wl-maroon);
+  font-family: "WL Gotham", "Gotham Light", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: wl-rise 0.6s ease both, wl-glow 1.8s ease-in-out 0.6s infinite;
+}
+#wl-loader .wl-open[hidden] {
+  display: none;
+}
+#wl-loader .wl-open svg {
+  width: 22px;
+  height: 15px;
+  flex: none;
+}
+#wl-loader .wl-open:hover {
+  background: linear-gradient(180deg, rgb(255, 251, 246), rgb(255, 228, 198));
+}
+#wl-loader .wl-open:focus-visible {
+  outline: 1.5px solid var(--wl-gold);
+  outline-offset: 4px;
+}
+@keyframes wl-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
 /* Exit: fade out, mandala blooms, toran lifts away. */
 #wl-loader.wl-done {
   opacity: 0;
@@ -257,7 +303,8 @@ html.wl-loading body {
   #wl-loader .wl-toran,
   #wl-music::before,
   #wl-music .wl-wave,
-  #wl-music.wl-waiting {
+  #wl-music.wl-waiting,
+  #wl-loader .wl-open {
     animation: none;
   }
 }
@@ -468,12 +515,19 @@ html.wl-loading body {
 </div>
 <p class="wl-blessing" lang="hi">॥ शुभ विवाह ॥</p>
 <svg class="wl-divider" viewBox="0 0 140 12" aria-hidden="true" focusable="false"><path d="M0 6H56M84 6H140" stroke="rgb(221,164,93)" stroke-width="1"/><path d="M70 1L75 6L70 11L65 6Z" fill="rgb(221,164,93)"/><circle cx="60" cy="6" r="1.6" fill="rgb(171,86,38)"/><circle cx="80" cy="6" r="1.6" fill="rgb(171,86,38)"/></svg>
-<p class="wl-caption">Preparing the celebration</p>
+<p class="wl-caption" id="wl-caption">Preparing the celebration</p>
+<button type="button" id="wl-open" class="wl-open" hidden><svg viewBox="0 0 24 16" aria-hidden="true" focusable="false"><path d="M12 1C14.5 4 14.5 9 12 13C9.5 9 9.5 4 12 1Z" fill="rgb(221,164,93)"/><path d="M12 13C9 11 6 8 4.5 4.5C8 5 10.5 8 12 13ZM12 13C15 11 18 8 19.5 4.5C16 5 13.5 8 12 13Z" fill="rgb(171,86,38)" opacity="0.8"/><path d="M3 14.5H21" stroke="rgb(221,164,93)" stroke-width="1.2" stroke-linecap="round"/></svg><span>Open Invitation</span></button>
 </div>
 <script>
 /* Wedding loader (0-100% until the page has fully loaded) and background
    music with a mute button. Inlined right after <body> by tools/build.js,
-   which also fills in the URLs of the two song files. */
+   which also fills in the URLs of the two song files.
+
+   Browsers refuse to start audio until the visitor has interacted with the
+   page. So at 100% the loader first tries to start the song: if the browser
+   allows it, the site opens with the music playing; if not, the loader shows
+   an "Open Invitation" button, and that tap opens the site and starts the
+   song together. */
 (function () {
   'use strict';
   var d = document;
@@ -486,9 +540,12 @@ html.wl-loading body {
 
   var ring = d.getElementById('wl-progress');
   var label = d.getElementById('wl-percent-value');
+  var caption = d.getElementById('wl-caption');
+  var openButton = d.getElementById('wl-open');
   var CIRC = 2 * Math.PI * 34;
   var MIN_MS = 1600; // the counter never runs 0 -> 100 faster than this
   var MAX_MS = 30000; // give up waiting for stragglers after this
+  var AUTOPLAY_WAIT_MS = 2500; // how long to wait for the browser's autoplay answer
   var t0 = performance.now();
   var last = t0;
   var shown = 0;
@@ -496,6 +553,8 @@ html.wl-loading body {
   var images = null;
   var loaded = d.readyState === 'complete';
   var fontsReady = false;
+  var readied = false;
+  var gateOpen = false;
   var finished = false;
 
   root.classList.add('wl-loading');
@@ -508,12 +567,18 @@ html.wl-loading body {
       e.stopImmediatePropagation();
     }
   }
-  function blockKeys(e) {
-    if (!finished && /^( |PageUp|PageDown|ArrowUp|ArrowDown|Home|End)$/.test(e.key)) blockScroll(e);
+  function onKey(e) {
+    if (finished) return;
+    if (gateOpen && (e.key === 'Enter' || e.key === ' ')) {
+      blockScroll(e);
+      open();
+    } else if (/^( |PageUp|PageDown|ArrowUp|ArrowDown|Home|End)$/.test(e.key)) {
+      blockScroll(e);
+    }
   }
   w.addEventListener('wheel', blockScroll, { capture: true, passive: false });
   w.addEventListener('touchmove', blockScroll, { capture: true, passive: false });
-  w.addEventListener('keydown', blockKeys, true);
+  w.addEventListener('keydown', onKey, true);
 
   function collectImages() {
     images = Array.prototype.filter.call(d.images, function (img) {
@@ -563,10 +628,54 @@ html.wl-loading body {
     var step = Math.max(0.2, (target - shown) * 0.1);
     shown = Math.min(target, shown + Math.min(step, (dt * 100) / MIN_MS));
     render(shown);
-    if (shown >= 100) finish();
+    if (shown >= 100) ready();
     else requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
+
+  // 100%: try to start the song. Open straight away if the browser lets it
+  // play (or the visitor has muted it before); otherwise ask for one tap.
+  function ready() {
+    if (readied) return;
+    readied = true;
+    if (music.isMuted()) return finish();
+    var answered = false;
+    var timer = setTimeout(function () {
+      // Still buffering on a slow connection: open anyway, the song follows.
+      if (!answered) {
+        answered = true;
+        finish();
+      }
+    }, AUTOPLAY_WAIT_MS);
+    music.tryAutoplay().then(function (playing) {
+      if (answered) return;
+      answered = true;
+      clearTimeout(timer);
+      if (playing) finish();
+      else showGate();
+    });
+  }
+
+  function showGate() {
+    gateOpen = true;
+    loader.classList.add('wl-ready');
+    caption.textContent = 'Tap to open the invitation';
+    openButton.hidden = false;
+    try {
+      openButton.focus({ preventScroll: true });
+    } catch (e) {
+      /* focus is a nicety */
+    }
+    // The whole loader is the tap target, not just the button.
+    loader.addEventListener('click', open);
+  }
+
+  // Runs inside the visitor's tap, which is what lets the browser play audio.
+  function open() {
+    if (finished) return;
+    music.play();
+    finish();
+  }
 
   // Framer plays the hero's entrance animations as soon as the HTML arrives,
   // which is underneath the loader. appear-recorder.js records them; replay
@@ -592,7 +701,8 @@ html.wl-loading body {
     finished = true;
     w.removeEventListener('wheel', blockScroll, true);
     w.removeEventListener('touchmove', blockScroll, true);
-    w.removeEventListener('keydown', blockKeys, true);
+    w.removeEventListener('keydown', onKey, true);
+    loader.removeEventListener('click', open);
     root.classList.remove('wl-loading');
     replayEntrance();
     loader.classList.add('wl-done');
@@ -607,6 +717,8 @@ html.wl-loading body {
   var music = (function () {
     var KEY = 'wl-music-muted';
     var VOLUME = 0.7;
+    var WEBM = '/custom/wedding-song.f09cd4aa.webm';
+    var MP3 = '/custom/wedding-song.78aa917f.mp3';
     var audio = null;
     var button = null;
     var muted = false;
@@ -631,7 +743,15 @@ html.wl-loading body {
       audio = new Audio();
       audio.loop = true;
       audio.preload = 'auto';
-      audio.src = audio.canPlayType('audio/webm; codecs="opus"') ? '/custom/wedding-song.f09cd4aa.webm' : '/custom/wedding-song.78aa917f.mp3';
+      // Opus is smaller, but only trust a firm "probably": Safari can answer
+      // "maybe" and then fail to decode it.
+      audio.src = audio.canPlayType('audio/webm; codecs="opus"') === 'probably' ? WEBM : MP3;
+      audio.addEventListener('error', function () {
+        if (audio.src.indexOf('.webm') < 0) return;
+        var wanted = !audio.paused || (!muted && button && !button.classList.contains('wl-waiting'));
+        audio.src = MP3;
+        if (wanted) play();
+      });
       return audio;
     }
 
@@ -657,28 +777,33 @@ html.wl-loading body {
       button.classList.toggle('wl-waiting', !!waiting && !muted);
     }
 
+    // Playback refused (no interaction yet): glow the button and start on
+    // the visitor's first tap, click or key press anywhere.
+    function refused() {
+      if (!audio.paused) return; // a later attempt already succeeded
+      update(true);
+      waitForGesture();
+    }
+
     function play() {
       ensureAudio();
-      var p = audio.play();
+      var p;
+      try {
+        p = audio.play();
+      } catch (e) {
+        return refused();
+      }
       if (p && p.then) {
         p.then(function () {
           fadeIn();
           update(false);
           stopWaiting();
-        }).catch(function () {
-          // Autoplay blocked until the visitor interacts with the page (a
-          // refusal can also arrive after a later attempt already succeeded).
-          if (!audio.paused) return;
-          update(true);
-          waitForGesture();
-        });
+        }).catch(refused);
       } else {
         update(false);
       }
     }
 
-    // Browsers only allow sound after a tap/click/key press, so if autoplay
-    // was refused, start on the visitor's first interaction.
     var gestures = ['pointerdown', 'touchend', 'click', 'keydown'];
     function onGesture(e) {
       if (button && button.contains(e.target)) return; // the button handles itself
@@ -709,6 +834,7 @@ html.wl-loading body {
     }
 
     function createButton() {
+      if (button) return;
       button = d.createElement('button');
       button.id = 'wl-music';
       button.type = 'button';
@@ -720,7 +846,7 @@ html.wl-loading body {
         '</svg>';
       button.addEventListener('click', toggle);
       d.body.appendChild(button);
-      update(muted);
+      update(false);
       requestAnimationFrame(function () {
         button.classList.add('wl-visible');
       });
@@ -738,9 +864,39 @@ html.wl-loading body {
     });
 
     return {
+      isMuted: function () {
+        return muted;
+      },
+      // Resolves true if the browser started the song without a tap.
+      tryAutoplay: function () {
+        ensureAudio();
+        var p;
+        try {
+          p = audio.play();
+        } catch (e) {
+          return Promise.resolve(false);
+        }
+        if (!p || !p.then) return Promise.resolve(!audio.paused);
+        return p.then(
+          function () {
+            fadeIn();
+            update(false);
+            return true;
+          },
+          function () {
+            if (finished) refused(); // the loader already opened on its timeout
+            return false;
+          }
+        );
+      },
+      play: play,
+      // Called when the loader lifts: show the button, and start the song if
+      // it is not already playing (or waiting for a tap).
       start: function () {
         createButton();
-        if (!muted) play();
+        if (muted) return update(false);
+        if (audio && !audio.paused) return update(false);
+        play();
       },
     };
   })();

@@ -139,6 +139,52 @@ html.wl-loading body {
   margin-top: -8px;
 }
 
+/* "Open Invitation": shown at 100% when the browser needs a tap before it
+   will play the song. The whole loader is clickable at that point. */
+#wl-loader.wl-ready {
+  cursor: pointer;
+}
+#wl-loader .wl-open {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 12px 28px 12px 22px;
+  border: 1.5px solid var(--wl-gold);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 251, 246, 0.96), rgba(255, 234, 210, 0.96));
+  box-shadow: 0 6px 18px rgba(95, 37, 15, 0.15), inset 0 0 0 3px rgba(255, 255, 255, 0.55);
+  color: var(--wl-maroon);
+  font-family: "WL Gotham", "Gotham Light", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: wl-rise 0.6s ease both, wl-glow 1.8s ease-in-out 0.6s infinite;
+}
+#wl-loader .wl-open[hidden] {
+  display: none;
+}
+#wl-loader .wl-open svg {
+  width: 22px;
+  height: 15px;
+  flex: none;
+}
+#wl-loader .wl-open:hover {
+  background: linear-gradient(180deg, rgb(255, 251, 246), rgb(255, 228, 198));
+}
+#wl-loader .wl-open:focus-visible {
+  outline: 1.5px solid var(--wl-gold);
+  outline-offset: 4px;
+}
+@keyframes wl-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
 /* Exit: fade out, mandala blooms, toran lifts away. */
 #wl-loader.wl-done {
   opacity: 0;
@@ -249,7 +295,8 @@ html.wl-loading body {
   #wl-loader .wl-toran,
   #wl-music::before,
   #wl-music .wl-wave,
-  #wl-music.wl-waiting {
+  #wl-music.wl-waiting,
+  #wl-loader .wl-open {
     animation: none;
   }
 }
