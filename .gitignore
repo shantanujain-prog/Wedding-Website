@@ -1,3 +1,5 @@
 .capture/
 node_modules/
 .verify/
+.DS_Store
+server.log
