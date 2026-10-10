@@ -279,8 +279,9 @@
     return {
       card,
       update(lt) {
-        const p = ease.out(prog(lt, 0.05, 0.55));
-        tf(card, { s: lerp(0.94, 1, p), o: p, y: (1 - p) * 20 });
+        // the frame is opaque from the first frame (it hides the erased area of the plate); only the text fades in
+        const p = ease.out(prog(lt, 0, 0.6));
+        tf(card, { s: lerp(0.96, 1, p), o: 1, y: (1 - p) * 14 });
         items.forEach((e, i) => fadeUp(e, lt, 0.28 + i * 0.075, { dur: 0.55, dist: 18, blur: 5 }));
         const q = prog(lt, 0.9, 1.1);
         band.style.left = lerp(-60, 130, q) + "%";

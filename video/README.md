@@ -2,7 +2,11 @@
 
 A 43.5-second, 1080×1920 (9:16) Instagram Reels video for Shantanu & Dr. Pragati,
 built from the wedding website's own artwork and fonts plus the five invitation
-illustrations. Output: `video/out/save-the-date.mp4` (H.264, 30 fps, AAC 48 kHz).
+illustrations. Output: `video/out/save-the-date.mp4` (H.264, 30 fps, AAC 48 kHz),
+plus `video/out/cover.jpg` (the intro at 3.6 s) to use as the Reel's cover.
+
+Event cards and the call to action stay between y≈120 and y≈1400, clear of the
+Reels caption and buttons at the bottom of the screen.
 
 ## Timeline
 
