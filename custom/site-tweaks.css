@@ -78,3 +78,31 @@ img[src*="plRMuObVZgXFVWzrOuY2xNVRHHs"],
 img[src*="svYNfrgA0JSnowyYTfnNW2qkvHY"] {
   display: none !important;
 }
+
+/* Hero: the wedding hashtag under "Shantanu weds Dr. Pragati". It hangs off
+   the bride's name line, so it scales with it at every breakpoint and plays
+   the same entrance animation. */
+[data-framer-name="Hero Title — Drashti"] p {
+  position: relative;
+}
+[data-framer-name="Hero Title — Drashti"] p::after {
+  content: "#SchoolmatesToSoulmates";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0.12em;
+  font-family: "Gotham Light", "Gotham Light Placeholder", sans-serif;
+  font-size: 0.2em;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: rgb(171, 86, 38);
+}
+
+/* Things to know: no Staff card (and one fewer divider); the row is a
+   centred flex row, so the other three re-centre. */
+[data-framer-name="Info Icons Row"] > :is([data-framer-name="Staff Item"], [data-framer-name="Divider 2"]) {
+  display: none !important;
+}
