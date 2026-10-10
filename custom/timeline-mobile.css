@@ -1,7 +1,13 @@
-/* Wedding Timeline cards on phones and tablets: the event names, venues and times are
-   longer than the template's, so set all card text a little smaller on narrow
-   screens. Framer sizes text as font-size * --framer-font-size-scale, so this
-   scales every line together and keeps the layout and line positions. */
+/* Wedding Timeline cards. The event names, venues and times are longer than
+   the template's, so the card text is set smaller. Framer sizes text as
+   font-size * --framer-font-size-scale, so each rule scales whole lines and
+   every line keeps its position in the card.
+
+   All six cards use the same sizes: event names are sized so the longest one
+   ("Sangeet Night") sits inside the card frame with the same margin as the
+   others, and the details lines share one size. */
+
+/* Details lines (day, date, venue, time) on phones and tablets. */
 @media (max-width: 1279.98px) {
   [data-framer-name="2 — Wedding Timeline"] :is([data-framer-name="1"], [data-framer-name="2"], [data-framer-name="3"], [data-framer-name="4"], [data-framer-name="5"], [data-framer-name="6"]) {
     --framer-font-size-scale: 0.86;
@@ -12,10 +18,40 @@
     --framer-font-size-scale: 0.8;
   }
 }
-/* Tablets: the cards are proportionally narrower, so the event names need
-   a little more room. */
+
+/* Event names, one size for all six cards at each breakpoint. */
+[data-framer-name="2 — Wedding Timeline"] :is([data-framer-name="1"], [data-framer-name="2"], [data-framer-name="3"], [data-framer-name="4"], [data-framer-name="5"], [data-framer-name="6"]) p[style*="IvyOra Display Medium"] {
+  --framer-font-size-scale: 0.84;
+}
 @media (min-width: 768px) and (max-width: 1279.98px) {
   [data-framer-name="2 — Wedding Timeline"] :is([data-framer-name="1"], [data-framer-name="2"], [data-framer-name="3"], [data-framer-name="4"], [data-framer-name="5"], [data-framer-name="6"]) p[style*="IvyOra Display Medium"] {
-    --framer-font-size-scale: 0.76;
+    --framer-font-size-scale: 0.6;
   }
+}
+@media (max-width: 767.98px) {
+  [data-framer-name="2 — Wedding Timeline"] :is([data-framer-name="1"], [data-framer-name="2"], [data-framer-name="3"], [data-framer-name="4"], [data-framer-name="5"], [data-framer-name="6"]) p[style*="IvyOra Display Medium"] {
+    --framer-font-size-scale: 0.65;
+  }
+}
+
+/* Tablets: the template places the venue, time and "More details below"
+   lines of the right-hand cards (and the fifth card) a few pixels higher than
+   in the left-hand cards. Line them up with the first card. */
+@media (min-width: 768px) and (max-width: 1279.98px) {
+  .framer-m1mGp :is(.framer-167zldh, .framer-maueyh, .framer-13qnxkd, .framer-lpiarf, .framer-peevne) { translate: 0 3px; }
+  .framer-m1mGp .framer-s3stta { translate: 0 4px; }
+  .framer-m1mGp :is(.framer-gabjxn, .framer-12cfd5e, .framer-fio3y0) { translate: 0 6px; }
+  .framer-m1mGp :is(.framer-rkvgfw, .framer-1ulj18x) { translate: 0 1px; }
+}
+
+/* Phones: on the 360px and 375px layouts the template sets the first card's
+   details lines differently from the other five (11px text at 360px, the time
+   line lower at 375px). Match the other cards. */
+@media (min-width: 360px) and (max-width: 374.98px), (max-width: 359.98px) {
+  .framer-m1mGp :is(.framer-gqrkym, .framer-1odyy6l, .framer-vjl56g, .framer-7e2jj1) { --framer-font-size-scale: 0.8727; }
+  .framer-m1mGp :is(.framer-1odyy6l, .framer-vjl56g) { translate: 0 -1px; }
+  .framer-m1mGp .framer-7e2jj1 { translate: 0 1px; }
+}
+@media (min-width: 375px) and (max-width: 389.98px) {
+  .framer-m1mGp .framer-7e2jj1 { translate: 0 -3px; }
 }
