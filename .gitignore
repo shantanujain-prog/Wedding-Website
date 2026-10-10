@@ -3,3 +3,5 @@ node_modules/
 .verify/
 .DS_Store
 server.log
+video/out/stills/
+video/assets/plates/*-debug.jpg
