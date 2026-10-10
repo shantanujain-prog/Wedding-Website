@@ -66,8 +66,15 @@
 /* Details lines (day, date, two-line venue, time) are spaced evenly by
    custom/timeline-cards.js. */
 
-/* No flag or flagpole in the hero. */
+/* No flag or flagpole in the hero. On /page both are unnamed layers: the flag
+   is the .framer-2ccryy-container component and the pole is matched by its
+   images. */
 [data-framer-name="Waving Flag"],
-[data-framer-name="Corner Decoration"] {
+.framer-2ccryy-container,
+[data-framer-name="Corner Decoration"],
+[data-framer-background-image-wrapper]:has(> img[src*="plRMuObVZgXFVWzrOuY2xNVRHHs"]),
+[data-framer-background-image-wrapper]:has(> img[src*="svYNfrgA0JSnowyYTfnNW2qkvHY"]),
+img[src*="plRMuObVZgXFVWzrOuY2xNVRHHs"],
+img[src*="svYNfrgA0JSnowyYTfnNW2qkvHY"] {
   display: none !important;
 }
