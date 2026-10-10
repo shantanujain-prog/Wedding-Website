@@ -125,10 +125,11 @@
       }
     }
     syncOrnaments(things);
-    // The map's "Location" buttons are the site's own button style.
+    // The map's location buttons are the site's own button style; the first
+    // one ("Magadham Grande") is the selected, filled one.
     var buttons = d.querySelectorAll('#main button');
     for (var i = 0; i < buttons.length; i++) {
-      if (/^\s*Location 1\s*$/.test(buttons[i].textContent) && visible(buttons[i])) {
+      if (/^\s*Magadham Grande\s*$/.test(buttons[i].textContent) && visible(buttons[i])) {
         var bcs = getComputedStyle(buttons[i]);
         var link = section.querySelector('.wl-reach-button');
         ['backgroundColor', 'color', 'borderRadius', 'fontFamily', 'fontSize', 'fontWeight', 'letterSpacing', 'boxShadow', 'border'].forEach(function (p) {

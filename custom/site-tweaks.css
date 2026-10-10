@@ -66,7 +66,8 @@
 /* Details lines (day, date, two-line venue, time) are spaced evenly by
    custom/timeline-cards.js. */
 
-/* No flag in the hero. */
-[data-framer-name="Waving Flag"] {
+/* No flag or flagpole in the hero. */
+[data-framer-name="Waving Flag"],
+[data-framer-name="Corner Decoration"] {
   display: none !important;
 }
