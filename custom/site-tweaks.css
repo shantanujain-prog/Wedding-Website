@@ -1,4 +1,6 @@
-/* Wedding Timeline cards. The event names, venues and times are longer than
+/* Site tweaks on top of the Framer page.
+
+   Wedding Timeline cards. The event names, venues and times are longer than
    the template's, so the card text is set smaller. Framer sizes text as
    font-size * --framer-font-size-scale, so each rule scales whole lines and
    every line keeps its position in the card.
@@ -54,4 +56,17 @@
 }
 @media (min-width: 375px) and (max-width: 389.98px) {
   .framer-m1mGp .framer-7e2jj1 { translate: 0 -3px; }
+}
+
+/* Event names sit 10px lower, giving them more room under the card's arch. */
+[data-framer-name="2 — Wedding Timeline"] :is([data-framer-name="1"], [data-framer-name="2"], [data-framer-name="3"], [data-framer-name="4"], [data-framer-name="5"], [data-framer-name="6"]) p[style*="IvyOra Display Medium"] {
+  translate: 0 10px;
+}
+
+/* Details lines (day, date, two-line venue, time) are spaced evenly by
+   custom/timeline-cards.js. */
+
+/* No flag in the hero. */
+[data-framer-name="Waving Flag"] {
+  display: none !important;
 }
