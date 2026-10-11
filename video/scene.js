@@ -166,7 +166,7 @@
   }
 
   // falling petals (marigold / rose / jasmine) or twinkling sparkles, in front of a scene
-  function petals(parent, seed, n, palette) {
+  function petals(parent, seed, n, palette, avoid = null) {
     const R = rng(seed), list = [];
     for (let i = 0; i < n; i++) {
       const c = palette[Math.floor(R() * palette.length)], size = 14 + R() * 14;
@@ -179,6 +179,11 @@
       for (const q of list) {
         const y = ((q.off + t * q.v) % (H + 200)) - 100, x = q.x + Math.sin(t * q.f * 6.28 + q.ph) * q.sway;
         q.s.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${(q.rot * t + q.ph * 50).toFixed(1)}deg)`;
+        if (avoid) {
+          // fade out near a block of text instead of crossing it
+          const dx = Math.max(avoid[0] - x, 0, x - avoid[2]), dy = Math.max(avoid[1] - y, 0, y - avoid[3]);
+          q.s.style.opacity = (0.92 * clamp(Math.hypot(dx, dy) / 60)).toFixed(3);
+        }
       }
     };
   }
@@ -310,7 +315,7 @@
     const shimmer = div(r, { top: "690px", width: W + "px", height: "470px", backgroundImage: "linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,246,222,.6) 50%, rgba(255,255,255,0) 58%)",
       backgroundSize: "300% 100%", backgroundRepeat: "no-repeat", mixBlendMode: "screen", opacity: 0 }, "abs");
     const fx = div(r, { opacity: 0 }, "layer");
-    const petU = petals(fx, 404, 12, ["#D83A2C", "#FFFFFF", "#F3B2B8", "#FFFFFF"]);
+    const petU = petals(fx, 404, 12, ["#D83A2C", "#FFFFFF", "#F3B2B8", "#FFFFFF"], [270, 640, 830, 1170]);
     const twU = sparkles(fx, 909, 14, [120, 760, 960, 1240]);
     // the doorway: leaves rotate in 3D about their hinges, the whole stack zooms through the opening
     const stack = div(r, { top: top + "px", width: W + "px", height: D.size[1] + "px", transformOrigin: `${dcx}px ${dcy}px`,
@@ -324,6 +329,11 @@
     const rays = div(stack, { width: W + "px", height: D.size[1] + "px", opacity: 0, mixBlendMode: "screen",
       clipPath: `polygon(${dw[0] + 70}px ${dw[3] - 4}px, ${dw[2] - 70}px ${dw[3] - 4}px, ${W + 300}px ${D.size[1]}px, -300px ${D.size[1]}px)`,
       background: "linear-gradient(180deg, rgba(255,236,192,.8), rgba(255,236,192,0) 85%)" }, "abs");
+    const glows = (D.flames || []).map(([fx, fy, fr], i) => ({
+      e: div(stack, { left: fx - fr * 2 + "px", top: fy - fr * 2.3 + "px", width: fr * 4 + "px", height: fr * 4 + "px", mixBlendMode: "screen",
+        background: "radial-gradient(circle at 50% 50%, rgba(255,214,140,.75) 0%, rgba(255,170,70,.35) 32%, rgba(255,150,60,0) 70%)" }, "abs"),
+      ph: i * 2.1,
+    }));
     const bells = D.bells.map((b, i) => ({
       e: img(stack, P + "doors/bell-" + b.id + ".webp", { left: b.x + "px", top: b.y + "px", width: b.w + "px", height: b.h + "px", transformOrigin: `${b.px}px ${b.py}px` }),
       inner: b.id.startsWith("inner"), ph: i * 0.9,
@@ -341,6 +351,7 @@
         leafL.style.filter = leafR.style.filter = `brightness(${(1 - 0.5 * open).toFixed(3)})`;
         glow.style.opacity = (0.85 * clamp(open * 2) * (1 - prog(t, 3.9, 1.4))).toFixed(3);
         rays.style.opacity = (0.55 * clamp(open * 2) * (1 - prog(t, 3.5, 1.2))).toFixed(3);
+        for (const g of glows) g.e.style.opacity = (0.8 + 0.12 * Math.sin(t * 9.3 + g.ph) + 0.06 * Math.sin(t * 23 + g.ph * 3)).toFixed(3);
         for (const b of bells) {
           let a = 0;
           for (const s of OPEN_STRIKES) if (t > s.t) {

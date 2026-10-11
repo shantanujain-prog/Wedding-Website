@@ -84,12 +84,17 @@ function serve() {
       `[1:a]aresample=48000,aformat=channel_layouts=stereo,adelay=${Math.round(musicAt * 1000)}:all=1,afade=t=in:st=${musicAt.toFixed(2)}:d=2.5,` +
       `volume='0.8*if(lt(t,${drop}),1.5,if(lt(t,${drop}+0.5),1.5-(t-${drop}),1))':eval=frame[song]`,
     ];
-    if (sfx.length) graph.push(`[2:a]aresample=48000,aformat=channel_layouts=stereo,asplit=${sfx.length}${sfx.map((_, i) => `[s${i}]`).join("")}`);
-    // each strike: pitch shift, fade the recording's clipped tail, then a dense reverb so it rings out;
-    // the door bells (first 5 s) are louder, the later ones sit under the music
+    if (sfx.length) {
+      graph.push(`[2:a]aresample=48000,aformat=channel_layouts=stereo,asplit=${sfx.length}${sfx.map((_, i) => `[s${i}]`).join("")}`);
+      graph.push(`[3:a]asplit=${sfx.length}${sfx.map((_, i) => `[ir${i}]`).join("")}`);
+    }
+    // each strike: pitch shift, fade the recording's clipped tail, then a smooth reverb tail (convolution
+    // with decaying noise, low-passed so the attack is not repeated); the door bells (first 5 s) are
+    // louder, the later ones sit under the music
     sfx.forEach((s, i) => graph.push(
-      `[s${i}]asetrate=${Math.round(48000 * s.rate)},aresample=48000,afade=t=out:st=${(1.4 / s.rate - 0.6).toFixed(2)}:d=0.55,apad=pad_dur=3,` +
-      `aecho=0.8:0.7:40|90|160|260|400|620:0.5|0.4|0.32|0.24|0.16|0.1,volume=${((s.t < 5 ? 3.6 : 2.4) * s.gain).toFixed(2)},` +
+      `[s${i}]asetrate=${Math.round(48000 * s.rate)},aresample=48000,afade=t=out:st=${(1.4 / s.rate - 0.6).toFixed(2)}:d=0.55,apad=pad_dur=3,asplit=2[d${i}][w${i}];` +
+      `[w${i}]lowpass=f=2400[l${i}];[l${i}][ir${i}]afir=gtype=peak[r${i}];` +
+      `[d${i}][r${i}]amix=inputs=2:normalize=0:weights=1 0.32,volume=${((s.t < 5 ? 3.6 : 2.4) * s.gain).toFixed(2)},` +
       `adelay=${Math.round((s.t - from) * 1000)}:all=1[b${i}]`));
     graph.push(`[song]${sfx.map((_, i) => `[b${i}]`).join("")}amix=inputs=${sfx.length + 1}:normalize=0:duration=first,` +
       `atrim=0:${len.toFixed(3)},afade=t=out:st=${Math.max(0, len - 3).toFixed(2)}:d=3,alimiter=limit=0.75:attack=2:release=60:level=false[a]`);
@@ -97,6 +102,7 @@ function serve() {
       "-y", "-loglevel", "error",
       "-f", "image2pipe", "-framerate", String(FPS), "-c:v", "png", "-i", "-",
       ...(audio ? ["-ss", String(SONG_START + Math.max(0, from - AUDIO.musicStart)), "-t", String(len + 1), "-i", SONG, "-i", BELL,
+        "-f", "lavfi", "-i", "aevalsrc=exprs=(2*random(0)-1)*exp(-2.4*t)*(1-exp(-90*t))|(2*random(1)-1)*exp(-2.4*t)*(1-exp(-90*t)):s=48000:d=2.2",
         "-filter_complex", graph.join(";"),
         "-map", "0:v", "-map", "[a]", "-c:a", "aac", "-b:a", "192k", "-ar", "48000"] : []),
       "-c:v", "libx264", "-preset", "slow", "-crf", "19", "-pix_fmt", "yuv420p", "-profile:v", "high", "-level", "4.2",

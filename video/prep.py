@@ -130,6 +130,8 @@ BELLS = [
         (926, 512), (942, 512), (950, 522), (958, 535), (962, 560), (964, 585), (976, 596), (992, 606), (988, 616), (942, 620),
         (942, 642), (925, 642), (925, 620), (882, 616), (878, 606), (892, 596), (906, 585), (908, 560), (912, 535), (918, 522)]},
 ]
+# the lamps' side flames that sit over the doors (output pixels); the scene redraws their glow
+DOOR_FLAMES = [[213, 1577, 46], [873, 1573, 46]]
 DOOR_LAMPS = [(90, 1428, 220, 1700), (804, 1428, 950, 1700)]  # oil lamps in front of the door corners
 # banana-leaf blades that cross the door edges, traced in output pixels
 DOOR_BLADES = [
@@ -172,12 +174,17 @@ def doors(debug):
         ImageDraw.Draw(blades).polygon(poly, fill=255)
     blades = np.asarray(blades.filter(ImageFilter.MaxFilter(9))) > 0
     plants = blades & ((R < G * 1.15) | (B < 0.22 * G)) & (lum > 12)
+    # lamps: only the brass and the flame cores stay in front; the orange glow painted around the
+    # flames is wood-coloured light that must not freeze in place while the doors move behind it
     lamps = np.zeros_like(plants)
+    glowzone = np.zeros_like(plants)
     for l, t, r, b in DOOR_LAMPS:
         inbox = (xx >= l * k) & (xx <= r * k) & (yy >= t * k) & (yy <= b * k)
-        lamps |= inbox & (lum > 118)
-    fg = Image.fromarray(((plants | lamps) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(3))
-    fg = np.asarray(fg) > 0
+        lamps |= inbox & (lum > 140)
+        glowzone |= inbox & (lum > 95)
+    lamps = np.asarray(Image.fromarray((lamps * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MaxFilter(5))) > 0
+    plants = np.asarray(Image.fromarray((plants * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(3))) > 0
+    fg = plants | lamps
 
     def grow_mask(m, px):
         return np.asarray(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(2 * px + 1))) > 0
@@ -235,7 +242,7 @@ def doors(debug):
     # leaves: whole doors (wood carried under the plants and lamps), 4 px larger than the
     # opening so their edges tuck under the frame and no light shows through the seam
     leaves = {}
-    under = grow_mask(fg & door, 3)
+    under = grow_mask((fg | glowzone) & door, 3)
     wood = clean.copy()
     wood = textured_fill(wood, under & (xx < DOOR_W / 2), 90, 0)
     wood = textured_fill(wood, under & (xx >= DOOR_W / 2), -90, 0)
@@ -251,14 +258,16 @@ def doors(debug):
         leaves[name] = {"x": int(x0), "y": int(y0), "w": int(x1 - x0), "h": int(y1 - y0)}
 
     # the front layer: everything except the doorway, keeping the plants and lamps that stand in front of it
-    hole = door & ~fg
-    front_alpha = Image.fromarray((~hole * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.5))
+    # soft edges on the plants and lamps where they cross the doorway
+    fg_soft = np.asarray(Image.fromarray((fg * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.2))).astype(np.float64) / 255
+    door_soft = np.asarray(Image.fromarray((door * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.5))).astype(np.float64) / 255
+    front_alpha = Image.fromarray(np.clip(255 * (1 - door_soft * (1 - fg_soft)), 0, 255).astype(np.uint8))
     front = clean_img.convert("RGBA")
     front.putalpha(front_alpha)
     front.save(os.path.join(out_dir, "frame.webp"), quality=92)
 
     ys, xs = np.where(door)
-    meta = {"size": [DOOR_W, H], "leaves": leaves, "bells": bells_meta,
+    meta = {"size": [DOOR_W, H], "leaves": leaves, "bells": bells_meta, "flames": DOOR_FLAMES,
             "doorway": [int(xs.min()), int(ys.min()), int(xs.max() + 1), int(ys.max() + 1)]}
     with open(os.path.join(out_dir, "doors.json"), "w") as f:
         json.dump(meta, f, indent=1)
