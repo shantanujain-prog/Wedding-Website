@@ -86,7 +86,7 @@ function serve() {
       `[s${i}]asetrate=${Math.round(48000 * s.rate)},aresample=48000,apad=pad_dur=2.5,` +
       `aecho=0.8:0.55:70|150|240:0.32|0.2|0.12,volume=${(2.1 * s.gain).toFixed(2)},adelay=${Math.round((s.t - from) * 1000)}:all=1[b${i}]`));
     graph.push(`[song]${sfx.map((_, i) => `[b${i}]`).join("")}amix=inputs=${sfx.length + 1}:normalize=0:duration=first,` +
-      `atrim=0:${len.toFixed(3)},afade=t=out:st=${Math.max(0, len - 3).toFixed(2)}:d=3,alimiter=limit=0.95[a]`);
+      `atrim=0:${len.toFixed(3)},afade=t=out:st=${Math.max(0, len - 3).toFixed(2)}:d=3,alimiter=limit=0.89:level=false[a]`);
     const ff = spawn("ffmpeg", [
       "-y", "-loglevel", "error",
       "-f", "image2pipe", "-framerate", String(FPS), "-c:v", "png", "-i", "-",
