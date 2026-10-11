@@ -10,16 +10,16 @@ Output: `video/out/save-the-date.mp4` (H.264, 30 fps, AAC 48 kHz), plus
 
 | Time (s) | Scene | Transition in |
 | --- | --- | --- |
-| 0.0 – 9.2 | **Doors → invocation**: the carved doors stand closed, bells ring (the website's bell sound, four strikes) and swing, the doors swing open in 3D, light spills out, and the camera passes through the doorway into the invocation (Mahavir, Mangalam shlok, "Jains cordially invites you to the wedding of"), with falling petals and a shimmer across the shlok | — |
-| 8.3 – 14.3 | **Names**: ॥ श्री महावीराय नमः ॥, "Shantanu *weds* Pragati", #SchoolmatesToSoulmates, torans, swaying bells, mandala, Sanchi stupa with layered parallax, birds | dissolve |
-| 13.4 – 19.6 | **Meet the couple**: Shantanu, Product Manager, Paytm; Dr. Pragati, Pediatrician, AIIMS New Delhi; parents' names; peacock arbor | iris |
-| 18.7 – 23.5 | **Mehndi**: Thursday 17 December 2026 · 3 PM onwards · Home, Vidisha | scroll reveal |
-| 22.6 – 27.4 | **Dev Darshan**: Friday 18 December 2026 · 8 AM onwards · Home, Vidisha | soft wipe |
-| 26.5 – 31.3 | **Haldi**: Saturday 19 December 2026 · Noon onwards · Magadham Grande, Sanchi | golden glow |
-| 30.4 – 35.2 | **Sangeet Night**: Saturday 19 December 2026 · 7 PM onwards · Magadham Grande, Sanchi | push up |
-| 34.3 – 39.1 | **Reception**: Sunday 20 December 2026 · Noon onwards · Magadham Grande, Sanchi | iris |
-| 38.2 – 43.0 | **Shaadi**: Sunday 20 December 2026 · 2 PM onwards · Magadham Grande, Sanchi | soft wipe |
-| 42.1 – 48.3 | **Save the Date**: 17 – 20 December 2026, Thu–Sun calendar, #SchoolmatesToSoulmates, floating photo frames | golden glow |
+| 0.0 – 9.6 | **Doors → invocation**: the carved doors stand closed, bells ring (the website's bell sound, five strikes) and swing, the doors swing slowly open in 3D (0.5–3.7 s) behind the banana plants and lamps, light spills out, and the camera passes through the doorway (3.2–5.2 s) into the invocation (Mahavir, Mangalam shlok, "Jains cordially invites you to the wedding of"), with falling petals and a shimmer across the shlok | — |
+| 8.7 – 14.7 | **Names**: ॥ श्री महावीराय नमः ॥, "Shantanu *weds* Pragati", #SchoolmatesToSoulmates, torans, swaying bells, mandala, Sanchi stupa with layered parallax, birds | dissolve |
+| 13.8 – 20.0 | **Meet the couple**: Shantanu, Product Manager, Paytm; Dr. Pragati, Pediatrician, AIIMS New Delhi; parents' names; peacock arbor | iris |
+| 19.1 – 23.9 | **Mehndi**: Thursday 17 December 2026 · 3 PM onwards · Home, Vidisha | scroll reveal |
+| 23.0 – 27.8 | **Dev Darshan**: Friday 18 December 2026 · 8 AM onwards · Home, Vidisha | soft wipe |
+| 26.9 – 31.7 | **Haldi**: Saturday 19 December 2026 · Noon onwards · Magadham Grande, Sanchi | golden glow |
+| 30.8 – 35.6 | **Sangeet Night**: Saturday 19 December 2026 · 7 PM onwards · Magadham Grande, Sanchi | push up |
+| 34.7 – 39.5 | **Reception**: Sunday 20 December 2026 · Noon onwards · Magadham Grande, Sanchi | iris |
+| 38.6 – 43.4 | **Shaadi**: Sunday 20 December 2026 · 2 PM onwards · Magadham Grande, Sanchi | soft wipe |
+| 42.5 – 48.3 | **Save the Date**: 17 – 20 December 2026, Thu–Sun calendar, #SchoolmatesToSoulmates, floating photo frames (Mehndi, Haldi, Sangeet, Shaadi) | golden glow |
 | 47.4 – 52.8 | **Call to action**: Follow us on Instagram (@hello.shantanu, @jainpragati23); Join the WhatsApp community for virtual or in-person celebrations | scroll reveal |
 | 51.9 – 56.9 | **Closing**: "Awaiting your presence", the elephant in the lotus pond, swaying bells, birds | dissolve |
 | 56.0 – 60.0 | **Monogram**: the SP logo on a deep brown card with a gold shimmer, #SchoolmatesToSoulmates, 17 – 20 December 2026, swaying bells | dissolve |
@@ -27,11 +27,13 @@ Output: `video/out/save-the-date.mp4` (H.264, 30 fps, AAC 48 kHz), plus
 Transitions last 0.9 s with eased in/out motion; the outgoing picture keeps
 drifting while the next one arrives.
 
-**Sound:** the website's bell (`assets/audio/bell.mp3`) rings four times while the
-doors open (at 0.25, 1.15, 2.05 and 2.9 s, each at a different pitch, with a
-short reverb tail), once as the closing scene's bells swing and once when the
-monogram appears. The website's song (`custom/wedding-song.mp3`, from 0:09)
-fades in from 2.4 s and fades out over the last 3 s.
+**Sound:** the website's bell (`assets/audio/bell.mp3`) rings five times while the
+doors open (at 0.25, 1.15, 2.05, 2.9 and 3.7 s, each at a different pitch, with a
+reverb tail), once as the closing scene's bells swing and once when the monogram
+appears. The website's song (`custom/wedding-song.mp3`, from 0:09) fades in from
+2.4 s, is lifted slightly until its beat drop at 19.7 s (as the Mehndi card
+arrives), and fades out over the last 3 s. A limiter keeps peaks below
+−2.5 dBFS so the AAC encode does not clip.
 
 ## Content
 

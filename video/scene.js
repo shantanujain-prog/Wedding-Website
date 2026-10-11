@@ -252,23 +252,23 @@
     const items = [];
     const add = (e) => (items.push(e), e);
     add(svg(inr, 60, 60, `<path d="M30 0 L36 23 L60 30 L36 37 L30 60 L24 37 L0 30 L24 23Z" fill="#DDA45D"/><circle cx="30" cy="30" r="5" fill="#FFF8EE"/>`,
-      { left: "268px", top: "44px", width: "60px" }));
+      { left: "268px", top: "72px", width: "60px" }));
     const ts = fitSize(ev.name, IVY5, 104, 470);
-    add(text(inr, ev.name, "ivy nowrap", { top: 128 + (104 - ts) * 0.6 + "px", fontSize: ts + "px", fontWeight: 500, color: "var(--copper)", lineHeight: 1 }));
+    add(text(inr, ev.name, "ivy nowrap", { top: 176 + (104 - ts) * 0.6 + "px", fontSize: ts + "px", fontWeight: 500, color: "var(--copper)", lineHeight: 1 }));
     const divider = (y, w) => svg(inr, w, 24, `<path d="M0 12 L${w / 2 - 22} 12 M${w / 2 + 22} 12 L${w} 12" stroke="#C99047" stroke-width="2"/><path d="M${w / 2} 2 L${w / 2 + 10} 12 L${w / 2} 22 L${w / 2 - 10} 12Z" fill="#DDA45D"/>`,
       { left: (RW - w) / 2 + "px", top: y + "px", width: w + "px" });
-    add(divider(262, 330));
-    add(text(inr, ev.day, "gotham caps nowrap", { top: "312px", fontSize: "30px", fontWeight: 500, letterSpacing: ".32em", color: "var(--copper)", lineHeight: 1, textIndent: ".32em" }));
-    add(text(inr, ev.date, "ivy nowrap", { top: "362px", fontSize: fitSize(ev.date, IVY, 58, 500) + "px", color: "var(--brown)", lineHeight: 1 }));
-    add(text(inr, ev.time, "ivy nowrap", { top: "440px", fontSize: "52px", color: "var(--brown)", lineHeight: 1 }));
-    add(divider(518, 200));
-    add(text(inr, ev.place, "ivy nowrap", { top: "560px", fontSize: fitSize(ev.place, IVY5, 58, 480) + "px", fontWeight: 500, color: "var(--brown)", lineHeight: 1 }));
-    const town = div(inr, { top: "636px", display: "flex", justifyContent: "center", alignItems: "center", gap: "12px" });
+    add(divider(300, 330));
+    add(text(inr, ev.day, "gotham caps nowrap", { top: "342px", fontSize: "30px", fontWeight: 500, letterSpacing: ".32em", color: "var(--copper)", lineHeight: 1, textIndent: ".32em" }));
+    add(text(inr, ev.date, "ivy nowrap", { top: "388px", fontSize: fitSize(ev.date, IVY, 58, 500) + "px", color: "var(--brown)", lineHeight: 1 }));
+    add(text(inr, ev.time, "ivy nowrap", { top: "460px", fontSize: "52px", color: "var(--brown)", lineHeight: 1 }));
+    add(divider(530, 200));
+    add(text(inr, ev.place, "ivy nowrap", { top: "568px", fontSize: fitSize(ev.place, IVY5, 58, 480) + "px", fontWeight: 500, color: "var(--brown)", lineHeight: 1 }));
+    const town = div(inr, { top: "640px", display: "flex", justifyContent: "center", alignItems: "center", gap: "12px" });
     svg(town, 22, 30, `<path d="M11 0 C4.9 0 0 4.9 0 11 C0 19 11 30 11 30 C11 30 22 19 22 11 C22 4.9 17.1 0 11 0Z" fill="#AB5626"/><circle cx="11" cy="11" r="4.2" fill="#FFF8EE"/>`,
       { position: "relative" });
     text(town, ev.town, "gotham caps nowrap", { fontSize: "30px", fontWeight: 500, letterSpacing: ".32em", color: "var(--copper)", lineHeight: 1 });
     add(town);
-    const sb = img(inr, A + "sunburst.webp", { left: "128px", top: "700px", width: "340px", height: "56px" });
+    const sb = img(inr, A + "sunburst.webp", { left: "128px", top: "702px", width: "340px", height: "56px" });
     add(sb);
     return {
       card,
@@ -298,7 +298,7 @@
   // website's bell sound at each one (rate = pitch, gain = loudness)
   const OPEN_STRIKES = [
     { t: 0.25, rate: 1.0, gain: 1.0 }, { t: 1.15, rate: 0.84, gain: 0.95 },
-    { t: 2.05, rate: 1.12, gain: 0.85 }, { t: 2.9, rate: 0.94, gain: 0.7 },
+    { t: 2.05, rate: 1.12, gain: 0.9 }, { t: 2.9, rate: 0.94, gain: 0.8 }, { t: 3.7, rate: 1.05, gain: 0.65 },
   ];
   function opening() {
     const sc = scene(), r = sc.root;
@@ -330,16 +330,17 @@
     }));
     const dim = div(r, { background: "#1a0904", opacity: 0.35 }, "layer");
     return Object.assign(sc, {
-      len: 9.2,
+      len: 9.6,
       update(t) {
         tf(dim, { o: 0.35 * (1 - ease.out(prog(t, 0, 1.1))) });
-        const open = ease.inOut(prog(t, 0.7, 2.7));
+        // the doors start moving at 0.5 s and take 3.2 s, slowly at first and last
+        const open = ease.sine(prog(t, 0.5, 3.2));
         const ang = 82 * open;
         leafL.style.transform = `rotateY(${ang.toFixed(3)}deg)`;
         leafR.style.transform = `rotateY(${(-ang).toFixed(3)}deg)`;
         leafL.style.filter = leafR.style.filter = `brightness(${(1 - 0.5 * open).toFixed(3)})`;
-        glow.style.opacity = (0.85 * clamp(open * 2) * (1 - prog(t, 3.0, 1.4))).toFixed(3);
-        rays.style.opacity = (0.55 * clamp(open * 2) * (1 - prog(t, 2.6, 1.2))).toFixed(3);
+        glow.style.opacity = (0.85 * clamp(open * 2) * (1 - prog(t, 3.9, 1.4))).toFixed(3);
+        rays.style.opacity = (0.55 * clamp(open * 2) * (1 - prog(t, 3.5, 1.2))).toFixed(3);
         for (const b of bells) {
           let a = 0;
           for (const s of OPEN_STRIKES) if (t > s.t) {
@@ -348,20 +349,20 @@
           }
           b.e.style.transform = `rotate(${a.toFixed(3)}deg)`;
         }
-        // camera: a slow drift, then through the doorway
-        const u = ease.inOut(prog(t, 2.2, 2.2));
-        const z = (1 + 0.02 * ease.sine(prog(t, 0, 2.2))) * (1 + 1.35 * u);
+        // camera: a slow drift, then through the doorway once the doors are mostly open
+        const u = ease.inOut(prog(t, 3.2, 2.0));
+        const z = (1 + 0.02 * ease.sine(prog(t, 0, 3.2))) * (1 + 1.35 * u);
         stack.style.transform = `scale(${z.toFixed(4)})`;
-        stack.style.opacity = (1 - prog(t, 3.8, 0.6)).toFixed(3);
-        stack.style.display = t > 4.45 ? "none" : "block";
+        stack.style.opacity = (1 - prog(t, 4.6, 0.6)).toFixed(3);
+        stack.style.display = t > 5.25 ? "none" : "block";
         // the invocation keeps covering the doorway while the camera passes through it
-        const s = (1 + 0.1 * Math.sin(Math.PI * u)) * (1 + 0.05 * ease.sine(prog(t, 4.4, 4.8)));
+        const s = (1 + 0.1 * Math.sin(Math.PI * u)) * (1 + 0.05 * ease.sine(prog(t, 5.2, 4.4)));
         const cx = lerp(scx, W / 2, u), cy = lerp(scy, H / 2, u);
         inv.style.transform = `translate(${(cx - W / 2).toFixed(2)}px,${(cy - H / 2).toFixed(2)}px) scale(${s.toFixed(4)})`;
-        fx.style.opacity = prog(t, 3.6, 0.9).toFixed(3);
+        fx.style.opacity = prog(t, 4.6, 0.9).toFixed(3);
         petU(t);
         twU(t);
-        const q = prog(t, 5.3, 1.3);
+        const q = prog(t, 6.0, 1.3);
         shimmer.style.opacity = (Math.sin(Math.PI * q) * 0.9).toFixed(3);
         shimmer.style.backgroundPosition = `${lerp(110, -10, q).toFixed(2)}% 0`;
       },
@@ -451,10 +452,11 @@
 
   function eventScene(ev, i) {
     const sc = scene(), r = sc.root, LEN = 4.8;
-    const cam = div(r, { transformOrigin: "50% 30%" }, "layer");
+    // the slow zoom is anchored near the card's title so the title never drifts up into the Reels header
+    const cam = div(r, { transformOrigin: "50% 14%" }, "layer");
     img(cam, P + ev.art + ".jpg", { left: 0, top: 0, width: W + "px", height: H + "px" });
+    const fx = div(cam, {}, "layer"); // petals fall behind the card, never across its text
     const card = makeCard(cam, ev, cardBox(CARDS.cards[ev.art].box, 1.035));
-    const fx = div(r, {}, "layer");
     const palettes = {
       mehndi: ["#F39A1E", "#F7C531", "#E64A6B", "#FFFFFF"], "dev-darshan": ["#FFFFFF", "#FFF4D6", "#F7C531"],
       haldi: ["#F7C531", "#F39A1E", "#E64A6B"], reception: ["#FFFFFF", "#FFE9EC", "#F7C531"], shaadi: ["#D83A2C", "#FFFFFF", "#F7C531", "#E64A6B"],
@@ -463,7 +465,7 @@
     return Object.assign(sc, {
       len: LEN,
       update(t) {
-        tf(cam, { s: 1 + 0.06 * ease.sine(clamp(t / LEN)), y: -7 * t });
+        tf(cam, { s: 1 + 0.05 * ease.sine(clamp(t / LEN)), y: 3 * t });
         card.update(t);
         fxU(t);
       },
@@ -482,7 +484,7 @@
     const arch = img(r, A + "floral-arch.webp", { left: "-80px", top: "-34px", width: "1240px", height: "391px" });
     const archB = img(r, A + "floral-arch.webp", { left: "-80px", top: "1563px", width: "1240px", height: "391px", transform: "scaleY(-1)" });
     const frames = [
-      ["mehndi", 52, 300, -8], ["dev-darshan", 798, 286, 7], ["sangeet", 58, 1500, 6], ["shaadi", 790, 1490, -7],
+      ["mehndi", 52, 300, -8], ["haldi", 798, 286, 7], ["sangeet", 58, 1500, 6], ["shaadi", 790, 1490, -7],
     ].map(([n, x, y, rot], k) => {
       const f = div(r, { position: "absolute", left: x + "px", top: y + "px", width: "230px", height: "276px", background: "#FFF8EE", padding: "12px",
         boxShadow: "0 16px 30px rgba(60,22,6,.35)", border: "3px solid #DDA45D", transformOrigin: "50% 50%" });
@@ -504,7 +506,7 @@
       background: "#FFF8EE", border: "3px solid #DDA45D", borderRadius: "999px", padding: "14px 40px 18px", lineHeight: 1 });
     const reg = text(r, C.region, "center gotham nowrap", { top: "1434px", fontSize: "32px", color: "var(--brown)", lineHeight: 1 });
     return Object.assign(sc, {
-      len: 6.2,
+      len: 5.8,
       update(t) {
         tf(rays, { r: t * 6 });
         tf(mand, { r: -t * 7, s: 1 + 0.02 * Math.sin(t * 2) });
@@ -587,12 +589,12 @@
     const twk = sparkles(water, 905, 22, [80, 1480, 1000, 1880]);
     const hang = [hanger(r, "bell", 62, 2.05, 0.3, 3.2), hanger(r, "toran", 150, 1.3, 1.5), hanger(r, "toran", 930, 1.3, 2.2), hanger(r, "bell", 1018, 2.05, 1.0, 3.2)];
     garland(r);
-    const a1 = text(r, C.closing.split(" ")[0], "center sig glow", { top: "236px", fontSize: "150px", color: "var(--copper)", lineHeight: 1 });
+    const a1 = text(r, C.closing.split(" ")[0], "center sig glow", { top: "214px", fontSize: "150px", color: "var(--copper)", lineHeight: 1 });
     const rest = C.closing.split(" ").slice(1).join(" ");
-    const a2 = text(r, rest, "center ivy caps glow nowrap", { top: "402px", fontSize: fitSize(rest, IVY5, 70, 760, 0.14) + "px", fontWeight: 500, letterSpacing: ".14em", textIndent: ".14em", color: "var(--brown)", lineHeight: 1 });
+    const a2 = text(r, rest, "center ivy caps glow nowrap", { top: "432px", fontSize: fitSize(rest, IVY5, 70, 760, 0.14) + "px", fontWeight: 500, letterSpacing: ".14em", textIndent: ".14em", color: "var(--brown)", lineHeight: 1 });
     const names = `${C.couple.groomFull} & ${C.couple.brideFull}`;
-    const nm = text(r, names, "center ivy glow nowrap", { top: "512px", fontSize: fitSize(names, IVY, 64, 760) + "px", color: "var(--brown)", lineHeight: 1 });
-    const dt = text(r, `${C.dates.range} ${C.dates.monthYear}`, "center gotham caps glow nowrap", { top: "604px", fontSize: "32px", fontWeight: 500, letterSpacing: ".3em", textIndent: ".3em", color: "var(--copper)", lineHeight: 1 });
+    const nm = text(r, names, "center ivy glow nowrap", { top: "536px", fontSize: fitSize(names, IVY, 64, 760) + "px", color: "var(--brown)", lineHeight: 1 });
+    const dt = text(r, `${C.dates.range} ${C.dates.monthYear}`, "center gotham caps glow nowrap", { top: "628px", fontSize: "32px", fontWeight: 500, letterSpacing: ".3em", textIndent: ".3em", color: "var(--copper)", lineHeight: 1 });
     return Object.assign(sc, {
       len: 5.0,
       update(t) {

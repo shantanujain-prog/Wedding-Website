@@ -40,15 +40,14 @@ CARDS = {
 }
 
 
-# Couple close-ups for the floating photo frames in the Save the Date scene,
-# cut from the clean plates,
+# Couple close-ups for the floating photo frames in the Save the Date scene, cut
+# below the printed card (only the card itself is erased, in case an edge reaches in),
 # in pixels of a 900x1600 frame (left, top, right, bottom), 5:6 portrait.
 CROPS = {
-    "mehndi": (70, 690, 670, 1410),
-    "dev-darshan": (0, 680, 600, 1400),
-    "sangeet": (170, 740, 770, 1460),
-    "reception": (90, 770, 690, 1490),
-    "shaadi": (120, 780, 760, 1548),
+    "mehndi": (60, 740, 640, 1436),
+    "haldi": (150, 795, 750, 1515),
+    "sangeet": (170, 790, 750, 1486),
+    "shaadi": (130, 840, 750, 1584),
 }
 
 
@@ -132,7 +131,13 @@ BELLS = [
         (942, 642), (925, 642), (925, 620), (882, 616), (878, 606), (892, 596), (906, 585), (908, 560), (912, 535), (918, 522)]},
 ]
 DOOR_LAMPS = [(90, 1428, 220, 1700), (804, 1428, 950, 1700)]  # oil lamps in front of the door corners
-DOOR_PLANTS = (0, 840, 1024, 1335)  # rows where banana leaves overlap the door edges
+# banana-leaf blades that cross the door edges, traced in output pixels
+DOOR_BLADES = [
+    [(140, 1005), (180, 995), (220, 987), (254, 985), (240, 995), (200, 1020), (165, 1050), (140, 1080)],
+    [(140, 1150), (180, 1150), (215, 1153), (242, 1165), (230, 1168), (190, 1170), (160, 1180), (140, 1188)],
+    [(838, 1018), (860, 1015), (900, 1030), (945, 1050), (945, 1105), (910, 1075), (870, 1045), (845, 1028)],
+    [(843, 1153), (880, 1152), (920, 1160), (945, 1168), (945, 1200), (915, 1185), (880, 1170), (850, 1160)],
+]
 
 
 def doors(debug):
@@ -158,49 +163,67 @@ def doors(debug):
     right_leaf = poly_mask([apex] + arch_r + [(DOOR_RIGHT_X, DOOR_BOTTOM), (DOOR_SEAM_X, DOOR_BOTTOM)])
     door = left_leaf | right_leaf
 
-    # things in front of the doors stay in the front layer: banana leaves (green) and the lamps (bright brass)
+    # things in front of the doors stay in the front layer: the banana-leaf blades that cross the
+    # door edges (traced; only leaf-coloured pixels inside the outlines) and the oil lamps (bright brass)
     yy = np.arange(H)[:, None] * np.ones((1, DOOR_W))
     xx = np.ones((H, 1)) * np.arange(DOOR_W)[None, :]
-    band = (yy >= DOOR_PLANTS[1] * k) & (yy <= DOOR_PLANTS[3] * k)
-    plants = band & (G > R - 4) & (G > B + 18) & (G > 40)
+    blades = Image.new("L", (DOOR_W, H), 0)
+    for poly in DOOR_BLADES:
+        ImageDraw.Draw(blades).polygon(poly, fill=255)
+    blades = np.asarray(blades.filter(ImageFilter.MaxFilter(9))) > 0
+    plants = blades & ((R < G * 1.15) | (B < 0.22 * G)) & (lum > 12)
     lamps = np.zeros_like(plants)
     for l, t, r, b in DOOR_LAMPS:
         inbox = (xx >= l * k) & (xx <= r * k) & (yy >= t * k) & (yy <= b * k)
         lamps |= inbox & (lum > 118)
-    fg = Image.fromarray(((plants | lamps) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(7)).filter(ImageFilter.MinFilter(3))
+    fg = Image.fromarray(((plants | lamps) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(3))
     fg = np.asarray(fg) > 0
+
+    def grow_mask(m, px):
+        return np.asarray(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(2 * px + 1))) > 0
+
+    def textured_fill(img, hole, dx, dy):
+        """Fill a hole with the surrounding colour (push-pull) plus carving/stone detail copied from (dx, dy) away."""
+        low = push_pull(img, (~hole).astype(np.float64))
+        src = np.roll(np.roll(img, -dy, axis=0), -dx, axis=1)
+        blur = np.asarray(Image.fromarray(np.clip(src, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(4))).astype(np.float64)
+        out = img.copy()
+        out[hole] = np.clip(low[hole] + 0.9 * (src[hole] - blur[hole]), 0, 255)
+        return out
 
     # bells: traced outline plus a straight chain up to the pivot
     bells_meta, bell_any = [], np.zeros((H, DOOR_W), bool)
-    sprites = []
+    sprites, holes = [], []
     for bl in BELLS:
         px, py = bl["pivot"]
         body = bl["body"]
         top = min(y for _, y in body)
+        bottom = max(y for _, y in body)
         cx = sum(x for x, _ in body) / len(body)
-        m = Image.new("L", (DOOR_W, H), 0)
-        d = ImageDraw.Draw(m)
-        d.polygon(body, fill=255)
         hw = bl["chain"] / 2
-        d.polygon([(px - hw, py), (px + hw, py), (cx + hw, top + 3), (cx - hw, top + 3)], fill=255)
+        mb = Image.new("L", (DOOR_W, H), 0)
+        ImageDraw.Draw(mb).polygon(body, fill=255)
+        mc = Image.new("L", (DOOR_W, H), 0)
+        ImageDraw.Draw(mc).polygon([(px - hw, py), (px + hw, py), (cx + hw, top + 3), (cx - hw, top + 3)], fill=255)
+        m = Image.fromarray(np.maximum(np.asarray(mb), np.asarray(mc)))
         bm = np.asarray(m) > 0
         bell_any |= bm
         alpha = m.filter(ImageFilter.GaussianBlur(0.9))
         xs = [x for x, _ in body] + [px - hw, px + hw]
         bx0, by0 = int(min(xs)) - 3, int(py) - 3
-        bx1, by1 = int(max(xs)) + 4, int(max(y for _, y in body)) + 4
+        bx1, by1 = int(max(xs)) + 4, int(bottom) + 4
         sprites.append((bl["id"], bx0, by0, bx1, by1, alpha))
         bells_meta.append({"id": bl["id"], "x": bx0, "y": by0, "w": bx1 - bx0, "h": by1 - by0,
                            "px": round(px - bx0, 1), "py": round(py - by0, 1)})
+        # holes left behind, grown past the bell's gold edge; detail comes from below (body) or beside (chain)
+        holes.append((grow_mask(np.asarray(mb) > 0, 5), 0, int(bottom - top) + 24))
+        holes.append((grow_mask(np.asarray(mc) > 0, 4), int(bl["chain"]) + 10, 0))
 
     # clean picture without the bells (they swing as separate sprites)
-    hole = np.asarray(Image.fromarray((bell_any * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5))) > 0
-    filled = push_pull(arr, (~hole).astype(np.float64))
     clean = arr.copy()
-    clean[hole] = filled[hole]
+    for hole, dx, dy in holes:
+        clean = textured_fill(clean, hole, dx, dy)
     clean_img = Image.fromarray(np.clip(clean, 0, 255).astype(np.uint8))
-    soft = clean_img.filter(ImageFilter.GaussianBlur(3))
-    clean_img = Image.composite(soft, clean_img, Image.fromarray((hole * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(2)))
 
     out_dir = os.path.join(OUT, "doors")
     os.makedirs(out_dir, exist_ok=True)
@@ -209,19 +232,27 @@ def doors(debug):
         spr.putalpha(alpha.crop((x0, y0, x1, y1)))
         spr.save(os.path.join(out_dir, "bell-" + bid + ".webp"), quality=95)
 
+    # leaves: whole doors (wood carried under the plants and lamps), 4 px larger than the
+    # opening so their edges tuck under the frame and no light shows through the seam
     leaves = {}
+    under = grow_mask(fg & door, 3)
+    wood = clean.copy()
+    wood = textured_fill(wood, under & (xx < DOOR_W / 2), 90, 0)
+    wood = textured_fill(wood, under & (xx >= DOOR_W / 2), -90, 0)
+    wood_img = Image.fromarray(np.clip(wood, 0, 255).astype(np.uint8))
     for name, lm in (("left", left_leaf), ("right", right_leaf)):
-        mask = lm & ~fg
-        ys, xs = np.where(lm)
+        mask = grow_mask(lm, 4)
+        ys, xs = np.where(mask)
         x0, y0, x1, y1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
-        a = Image.fromarray((mask * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.7))
-        leaf = clean_img.convert("RGBA")
+        a = Image.fromarray((mask * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.6))
+        leaf = wood_img.convert("RGBA")
         leaf.putalpha(a)
         leaf.crop((x0, y0, x1, y1)).save(os.path.join(out_dir, "leaf-" + name + ".webp"), quality=92)
         leaves[name] = {"x": int(x0), "y": int(y0), "w": int(x1 - x0), "h": int(y1 - y0)}
 
-    # the front layer: everything except the two leaves
-    front_alpha = Image.fromarray((~(door & ~fg) * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.7))
+    # the front layer: everything except the doorway, keeping the plants and lamps that stand in front of it
+    hole = door & ~fg
+    front_alpha = Image.fromarray((~hole * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.5))
     front = clean_img.convert("RGBA")
     front.putalpha(front_alpha)
     front.save(os.path.join(out_dir, "frame.webp"), quality=92)
@@ -263,6 +294,7 @@ def main():
     doors(debug)
     logo()
     poly = silhouette()
+    minimal = {}
     meta = {"silhouette": [[round(x, 4), round(y, 4)] for x, y in poly], "cards": {}}
     for name, (l, t, r, b) in CARDS.items():
         src = Image.open(os.path.join(INV, name + ".jpg")).convert("RGB")
@@ -284,6 +316,10 @@ def main():
         feather = mask.filter(ImageFilter.GaussianBlur(10 * sx))
         plate = Image.composite(soft, plate, feather)
         plate.save(os.path.join(OUT, name + ".jpg"), quality=93)
+        # for the photo crops: erase only the card itself, keep everything around it sharp
+        tight = Image.new("L", (W, H), 0)
+        ImageDraw.Draw(tight).polygon([(box[0] + x * bw, box[1] + y * bh) for x, y in grow(poly, 1.025)], fill=255)
+        minimal[name] = Image.composite(plate, src, tight.filter(ImageFilter.GaussianBlur(1.5 * sx)))
         meta["cards"][name] = {
             "size": [W, H],
             "box": [round(box[0] / W, 4), round(box[1] / H, 4), round(box[2] / W, 4), round(box[3] / H, 4)],
@@ -299,8 +335,7 @@ def main():
             both.save(os.path.join(OUT, name + "-debug.jpg"), quality=80)
         print(name, (W, H), "card", [round(v) for v in box])
     for name, (l, t, r, b) in CROPS.items():
-        # from the clean plate, so no part of the printed card shows
-        src = Image.open(os.path.join(OUT, name + ".jpg")).convert("RGB")
+        src = minimal[name]
         sx, sy = src.size[0] / 900, src.size[1] / 1600
         crop = src.crop((round(l * sx), round(t * sy), round(r * sx), round(b * sy))).resize((500, 600), Image.LANCZOS)
         crop.save(os.path.join(OUT, "couple-" + name + ".jpg"), quality=90)
