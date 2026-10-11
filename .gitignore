@@ -5,3 +5,4 @@ node_modules/
 server.log
 video/out/stills/
 video/assets/plates/*-debug.jpg
+video/assets/plates/doors/debug.jpg

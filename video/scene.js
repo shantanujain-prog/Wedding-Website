@@ -5,7 +5,7 @@
   const C = window.CONFIG;
   const W = 1080, H = 1920;
   const A = "assets/site/", P = "assets/plates/";
-  const TD = 0.6; // transition length, seconds
+  const TD = 0.9; // transition length, seconds
 
   // ---------- maths ----------
   const clamp = (x, a = 0, b = 1) => (x < a ? a : x > b ? b : x);
@@ -211,16 +211,10 @@
     };
   }
 
-  // a dashed "to be supplied" chip, or the final value once it is filled in
-  function valueChip(parent, v, size, top) {
-    const wrap = div(parent, { top: top + "px" }, "center");
-    if (typeof v === "string") {
-      const c = text(wrap, v, "chip final", { fontSize: size + "px" });
-      return wrap;
-    }
-    const tag = text(wrap, "PLACEHOLDER · REPLACE BEFORE PUBLISHING", "todo-tag", {});
-    el("br", wrap);
-    const c = text(wrap, `[ ${v.placeholder} ]`, "chip todo", { fontSize: fitSize(`[ ${v.placeholder} ]`, GOT5, size, 760) + "px", marginTop: "12px" });
+  // a copper pill with one value (Instagram handle, link), centred in a card of width w
+  function chip(parent, value, size, top, w) {
+    const wrap = div(parent, { top: top + "px", width: w + "px" }, "center");
+    text(wrap, value, "chip", { fontSize: fitSize(value, GOT5, size, w - 160) + "px" });
     return wrap;
   }
 
@@ -282,7 +276,7 @@
         // the frame is opaque from the first frame (it hides the erased area of the plate); only the text fades in
         const p = ease.out(prog(lt, 0, 0.6));
         tf(card, { s: lerp(0.96, 1, p), o: 1, y: (1 - p) * 14 });
-        items.forEach((e, i) => fadeUp(e, lt, 0.28 + i * 0.075, { dur: 0.55, dist: 18, blur: 5 }));
+        items.forEach((e, i) => fadeUp(e, lt, 0.12 + i * 0.06, { dur: 0.55, dist: 18, blur: 5 }));
         const q = prog(lt, 0.9, 1.1);
         band.style.left = lerp(-60, 130, q) + "%";
         band.style.opacity = q > 0 && q < 1 ? 1 : 0;
@@ -294,6 +288,84 @@
   function scene() {
     const root = div(stage, {}, "scene");
     return { root };
+  }
+
+  // ---------- opening: the carved doors swing open onto the invocation ----------
+  // Layers made by prep.py from the closed-door panel: the frame (everything but the
+  // doors), the two leaves, and the four bells as separate sprites.
+  let DOORS;
+  // bell strikes during the opening, seconds into the scene; render.cjs plays the
+  // website's bell sound at each one (rate = pitch, gain = loudness)
+  const OPEN_STRIKES = [
+    { t: 0.25, rate: 1.0, gain: 1.0 }, { t: 1.15, rate: 0.84, gain: 0.95 },
+    { t: 2.05, rate: 1.12, gain: 0.85 }, { t: 2.9, rate: 0.94, gain: 0.7 },
+  ];
+  function opening() {
+    const sc = scene(), r = sc.root;
+    const D = DOORS, top = -Math.round((D.size[1] - H) / 2);
+    const dw = D.doorway, dcx = (dw[0] + dw[2]) / 2, dcy = (dw[1] + dw[3]) / 2;
+    const scx = dcx, scy = dcy + top; // doorway centre on screen
+    // the invocation: first seen through the doorway, then full screen
+    const inv = img(r, "assets/invites/invocation.jpg", { left: 0, top: 0, width: W + "px", height: H + "px", transformOrigin: "50% 50%" });
+    const shimmer = div(r, { top: "690px", width: W + "px", height: "470px", backgroundImage: "linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,246,222,.6) 50%, rgba(255,255,255,0) 58%)",
+      backgroundSize: "300% 100%", backgroundRepeat: "no-repeat", mixBlendMode: "screen", opacity: 0 }, "abs");
+    const fx = div(r, { opacity: 0 }, "layer");
+    const petU = petals(fx, 404, 12, ["#D83A2C", "#FFFFFF", "#F3B2B8", "#FFFFFF"]);
+    const twU = sparkles(fx, 909, 14, [120, 760, 960, 1240]);
+    // the doorway: leaves rotate in 3D about their hinges, the whole stack zooms through the opening
+    const stack = div(r, { top: top + "px", width: W + "px", height: D.size[1] + "px", transformOrigin: `${dcx}px ${dcy}px`,
+      perspective: "1700px", perspectiveOrigin: `${dcx}px ${dcy}px` }, "abs");
+    const glow = div(stack, { left: dw[0] + "px", top: dw[1] + "px", width: dw[2] - dw[0] + "px", height: dw[3] - dw[1] + "px", opacity: 0,
+      background: "radial-gradient(ellipse at 50% 46%, rgba(255,247,226,.95) 0%, rgba(255,228,172,.55) 42%, rgba(255,222,160,0) 76%)" }, "abs");
+    const L = D.leaves.left, Rt = D.leaves.right;
+    const leafL = img(stack, P + "doors/leaf-left.webp", { left: L.x + "px", top: L.y + "px", width: L.w + "px", height: L.h + "px", transformOrigin: "0% 50%" });
+    const leafR = img(stack, P + "doors/leaf-right.webp", { left: Rt.x + "px", top: Rt.y + "px", width: Rt.w + "px", height: Rt.h + "px", transformOrigin: "100% 50%" });
+    img(stack, P + "doors/frame.webp", { left: 0, top: 0, width: W + "px", height: D.size[1] + "px" });
+    const rays = div(stack, { width: W + "px", height: D.size[1] + "px", opacity: 0, mixBlendMode: "screen",
+      clipPath: `polygon(${dw[0] + 70}px ${dw[3] - 4}px, ${dw[2] - 70}px ${dw[3] - 4}px, ${W + 300}px ${D.size[1]}px, -300px ${D.size[1]}px)`,
+      background: "linear-gradient(180deg, rgba(255,236,192,.8), rgba(255,236,192,0) 85%)" }, "abs");
+    const bells = D.bells.map((b, i) => ({
+      e: img(stack, P + "doors/bell-" + b.id + ".webp", { left: b.x + "px", top: b.y + "px", width: b.w + "px", height: b.h + "px", transformOrigin: `${b.px}px ${b.py}px` }),
+      inner: b.id.startsWith("inner"), ph: i * 0.9,
+    }));
+    const dim = div(r, { background: "#1a0904", opacity: 0.35 }, "layer");
+    return Object.assign(sc, {
+      len: 9.2,
+      update(t) {
+        tf(dim, { o: 0.35 * (1 - ease.out(prog(t, 0, 1.1))) });
+        const open = ease.inOut(prog(t, 0.7, 2.7));
+        const ang = 82 * open;
+        leafL.style.transform = `rotateY(${ang.toFixed(3)}deg)`;
+        leafR.style.transform = `rotateY(${(-ang).toFixed(3)}deg)`;
+        leafL.style.filter = leafR.style.filter = `brightness(${(1 - 0.5 * open).toFixed(3)})`;
+        glow.style.opacity = (0.85 * clamp(open * 2) * (1 - prog(t, 3.0, 1.4))).toFixed(3);
+        rays.style.opacity = (0.55 * clamp(open * 2) * (1 - prog(t, 2.6, 1.2))).toFixed(3);
+        for (const b of bells) {
+          let a = 0;
+          for (const s of OPEN_STRIKES) if (t > s.t) {
+            const d = t - s.t;
+            a += (b.inner ? 6.5 : 4) * s.gain * Math.exp(-d / 1.5) * Math.sin(2 * Math.PI * (b.inner ? 0.95 : 0.72) * d + b.ph * 0.15);
+          }
+          b.e.style.transform = `rotate(${a.toFixed(3)}deg)`;
+        }
+        // camera: a slow drift, then through the doorway
+        const u = ease.inOut(prog(t, 2.2, 2.2));
+        const z = (1 + 0.02 * ease.sine(prog(t, 0, 2.2))) * (1 + 1.35 * u);
+        stack.style.transform = `scale(${z.toFixed(4)})`;
+        stack.style.opacity = (1 - prog(t, 3.8, 0.6)).toFixed(3);
+        stack.style.display = t > 4.45 ? "none" : "block";
+        // the invocation keeps covering the doorway while the camera passes through it
+        const s = (1 + 0.1 * Math.sin(Math.PI * u)) * (1 + 0.05 * ease.sine(prog(t, 4.4, 4.8)));
+        const cx = lerp(scx, W / 2, u), cy = lerp(scy, H / 2, u);
+        inv.style.transform = `translate(${(cx - W / 2).toFixed(2)}px,${(cy - H / 2).toFixed(2)}px) scale(${s.toFixed(4)})`;
+        fx.style.opacity = prog(t, 3.6, 0.9).toFixed(3);
+        petU(t);
+        twU(t);
+        const q = prog(t, 5.3, 1.3);
+        shimmer.style.opacity = (Math.sin(Math.PI * q) * 0.9).toFixed(3);
+        shimmer.style.backgroundPosition = `${lerp(110, -10, q).toFixed(2)}% 0`;
+      },
+    });
   }
 
   function intro() {
@@ -312,25 +384,25 @@
     const g = text(r, C.couple.groom, "center ivy glow nowrap", { top: "318px", fontSize: fitSize(C.couple.groom, IVY5, 172, 760) + "px", fontWeight: 500, color: "var(--copper)", lineHeight: 1.05 });
     const weds = text(r, "weds", "center sig glow", { top: "492px", fontSize: "150px", color: "var(--brown)", lineHeight: 1 });
     const b = text(r, C.couple.bride, "center ivy glow nowrap", { top: "600px", fontSize: fitSize(C.couple.bride, IVY5, 172, 760) + "px", fontWeight: 500, color: "var(--copper)", lineHeight: 1.05 });
-    const inv = text(r, C.invite, "center gotham glow", { top: "812px", fontSize: fitSize(C.invite, GOT4, 40, 900) + "px", color: "var(--brown)", lineHeight: 1.2 });
+    const hs = text(r, C.hashtag, "center ivy glow nowrap", { top: "806px", fontSize: fitSize(C.hashtag, IVY, 54, 860) + "px", color: "var(--copper)", lineHeight: 1.1 });
     const hang = [
       hanger(r, "toran", 34, 1.45, 0.0), hanger(r, "bell", 96, 2.0, 1.1, 3), hanger(r, "toran", 158, 1.25, 2.0),
       hanger(r, "toran", 922, 1.25, 0.7), hanger(r, "bell", 984, 2.0, 2.6, 3), hanger(r, "toran", 1046, 1.45, 1.6),
     ];
     garland(r);
     return Object.assign(sc, {
-      len: 5.6,
+      len: 6.0,
       update(t) {
         skyU(t);
         tf(mand, { r: t * 5, o: 0.22 * ease.out(prog(t, 0.2, 1.2)) });
         tf(mtn, { y: -6 * t });
-        tf(stupa, { s: 1 + 0.055 * ease.sine(clamp(t / 5.6)), y: 24 - 10 * t });
+        tf(stupa, { s: 1 + 0.055 * ease.sine(clamp(t / 6.0)), y: 24 - 9 * t });
         flyU(t);
         fadeUp(shri, t, 0.15);
         fadeUp(g, t, 0.45, { dur: 0.9, dist: 44, blur: 12 });
         wipe(weds, t, 1.15, 0.85);
         fadeUp(b, t, 1.6, { dur: 0.9, dist: 44, blur: 12 });
-        fadeUp(inv, t, 2.35);
+        fadeUp(hs, t, 2.35);
         const strike = Math.exp(-t / 1.6) * 3; // bells swing harder as the reel opens
         hang.forEach((h) => h.update(t, strike));
       },
@@ -359,7 +431,7 @@
     const amp = text(r, "&", "center sig", { top: "975px", fontSize: "120px", color: "var(--gold-deep)", lineHeight: 1 });
     const bb = block(1080, c.brideFull, c.brideRole, c.brideOrg, c.brideParents);
     return Object.assign(sc, {
-      len: 5.6,
+      len: 6.2,
       update(t) {
         tf(mand, { r: -t * 4 });
         tf(pea, { y: 40 - 14 * t, s: 1 + 0.01 * t });
@@ -377,50 +449,22 @@
     });
   }
 
-  function shaadiArt(cam) {
-    const skyU = sky(cam, 540, 640);
-    const gar = img(cam, A + "garden-chhatris.webp", { left: "-160px", top: "700px", width: "1400px", height: "978px" });
-    const mandap = img(cam, A + "mandap.webp", { left: "40px", top: "880px", width: "1000px", height: "3746px", transformOrigin: "50% 0" });
-    const hang = [hanger(cam, "toran", 40, 1.6, 0.4), hanger(cam, "bell", 110, 2.1, 1.7, 3), hanger(cam, "bell", 970, 2.1, 0.9, 3), hanger(cam, "toran", 1040, 1.6, 2.4)];
-    garland(cam);
-    return (t) => {
-      skyU(t);
-      tf(gar, { y: -4 * t });
-      tf(mandap, { s: 1 + 0.012 * t });
-      hang.forEach((h) => h.update(t, Math.exp(-t / 1.2) * 2));
-    };
-  }
-
   function eventScene(ev, i) {
-    const sc = scene(), r = sc.root;
+    const sc = scene(), r = sc.root, LEN = 4.8;
     const cam = div(r, { transformOrigin: "50% 30%" }, "layer");
-    let artU = null, box;
-    if (ev.art) {
-      img(cam, P + ev.art + ".jpg", { left: 0, top: 0, width: W + "px", height: H + "px" });
-      box = cardBox(CARDS.cards[ev.art].box, 1.035);
-    } else {
-      artU = shaadiArt(cam);
-      box = cardBox(CARDS.cards.haldi.box, 1.035);
-    }
-    const card = makeCard(cam, ev, box);
-    let tag = null;
-    if (!ev.art && C.showPlaceholderTags) {
-      tag = div(r, { top: box.t + box.h + 26 + "px" }, "center");
-      text(tag, "PLACEHOLDER ART · " + ev.artPlaceholder.toUpperCase(), "todo-tag", { fontSize: "21px" });
-    }
+    img(cam, P + ev.art + ".jpg", { left: 0, top: 0, width: W + "px", height: H + "px" });
+    const card = makeCard(cam, ev, cardBox(CARDS.cards[ev.art].box, 1.035));
     const fx = div(r, {}, "layer");
     const palettes = {
       mehndi: ["#F39A1E", "#F7C531", "#E64A6B", "#FFFFFF"], "dev-darshan": ["#FFFFFF", "#FFF4D6", "#F7C531"],
-      haldi: ["#F7C531", "#F39A1E", "#E64A6B"], reception: ["#FFFFFF", "#FFE9EC", "#F7C531"], null: ["#D83A2C", "#F39A1E", "#F7C531"],
+      haldi: ["#F7C531", "#F39A1E", "#E64A6B"], reception: ["#FFFFFF", "#FFE9EC", "#F7C531"], shaadi: ["#D83A2C", "#FFFFFF", "#F7C531", "#E64A6B"],
     };
-    const fxU = ev.art === "sangeet" ? sparkles(fx, 77 + i, 26, [40, 980, 1040, 1850]) : petals(fx, 31 + i, 11, palettes[ev.art] || palettes.null);
+    const fxU = ev.art === "sangeet" ? sparkles(fx, 77 + i, 26, [40, 980, 1040, 1850]) : petals(fx, 31 + i, 11, palettes[ev.art] || palettes.shaadi);
     return Object.assign(sc, {
-      len: 3.9,
+      len: LEN,
       update(t) {
-        tf(cam, { s: 1 + 0.055 * ease.sine(clamp(t / 3.9)), y: -8 * t });
-        if (artU) artU(t);
+        tf(cam, { s: 1 + 0.06 * ease.sine(clamp(t / LEN)), y: -7 * t });
         card.update(t);
-        if (tag) fadeUp(tag, t, 0.9, { dist: 10 });
         fxU(t);
       },
     });
@@ -438,7 +482,7 @@
     const arch = img(r, A + "floral-arch.webp", { left: "-80px", top: "-34px", width: "1240px", height: "391px" });
     const archB = img(r, A + "floral-arch.webp", { left: "-80px", top: "1563px", width: "1240px", height: "391px", transform: "scaleY(-1)" });
     const frames = [
-      ["mehndi", 52, 300, -8], ["dev-darshan", 798, 286, 7], ["sangeet", 58, 1500, 6], ["reception", 790, 1490, -7],
+      ["mehndi", 52, 300, -8], ["dev-darshan", 798, 286, 7], ["sangeet", 58, 1500, 6], ["shaadi", 790, 1490, -7],
     ].map(([n, x, y, rot], k) => {
       const f = div(r, { position: "absolute", left: x + "px", top: y + "px", width: "230px", height: "276px", background: "#FFF8EE", padding: "12px",
         boxShadow: "0 16px 30px rgba(60,22,6,.35)", border: "3px solid #DDA45D", transformOrigin: "50% 50%" });
@@ -460,7 +504,7 @@
       background: "#FFF8EE", border: "3px solid #DDA45D", borderRadius: "999px", padding: "14px 40px 18px", lineHeight: 1 });
     const reg = text(r, C.region, "center gotham nowrap", { top: "1434px", fontSize: "32px", color: "var(--brown)", lineHeight: 1 });
     return Object.assign(sc, {
-      len: 5.4,
+      len: 6.2,
       update(t) {
         tf(rays, { r: t * 6 });
         tf(mand, { r: -t * 7, s: 1 + 0.02 * Math.sin(t * 2) });
@@ -487,39 +531,44 @@
   }
 
   function cta() {
-    const sc = scene(), r = sc.root;
+    const sc = scene(), r = sc.root, cc = C.cta;
     r.style.background = "linear-gradient(180deg, #FFF6EC 0%, #FFEFE0 55%, #F6DCC0 100%)";
     const mand = mandala(r, 540, 900, 560, "#DDA45D", 0.12);
     const gard = img(r, A + "garden-chhatris.webp", { left: "-110px", top: "1390px", width: "1300px", height: "908px" });
-    const arch = img(r, A + "floral-arch.webp", { left: "-80px", top: "-34px", width: "1240px", height: "391px" });
-    const h = text(r, "Celebrate with us", "center sig", { top: "300px", fontSize: "116px", color: "var(--copper)", lineHeight: 1 });
-    const cardStyle = (top, height) => ({ position: "absolute", left: "80px", top: top + "px", width: "920px", height: height + "px", borderRadius: "40px", background: "rgba(255,250,243,.96)",
+    img(r, A + "floral-arch.webp", { left: "-80px", top: "-34px", width: "1240px", height: "391px" });
+    const h = text(r, "Celebrate with us", "center sig", { top: "290px", fontSize: "116px", color: "var(--copper)", lineHeight: 1 });
+    const CW = 920;
+    const cardStyle = (top, height) => ({ position: "absolute", left: "80px", top: top + "px", width: CW + "px", height: height + "px", borderRadius: "40px", background: "rgba(255,250,243,.96)",
       border: "3px solid #DDA45D", boxShadow: "0 18px 40px rgba(95,37,15,.18), inset 0 0 0 10px rgba(255,250,243,1), inset 0 0 0 12px rgba(221,164,93,.55)" });
-    const c1 = div(r, cardStyle(470, 410));
+    // Instagram: one pill per handle
+    const h1 = 248 + cc.instagramHandles.length * 92 + 22;
+    const c1 = div(r, cardStyle(456, h1));
     const ig = svg(c1, 104, 104, `<rect x="6" y="6" width="92" height="92" rx="28" fill="none" stroke="#AB5626" stroke-width="9"/><circle cx="52" cy="52" r="21" fill="none" stroke="#AB5626" stroke-width="9"/><circle cx="77" cy="27" r="6.5" fill="#AB5626"/>`,
-      { left: "408px", top: "40px", transformOrigin: "50% 50%" });
-    text(c1, C.cta.instagramTitle, "center ivy nowrap", { width: "920px", top: "166px", fontSize: fitSize(C.cta.instagramTitle, IVY5, 64, 840) + "px", fontWeight: 500, color: "var(--brown)", lineHeight: 1 });
-    const ch1 = valueChip(c1, C.cta.instagramHandle, 44, 250);
-    ch1.style.width = "920px";
-    const c2 = div(r, cardStyle(920, 470));
+      { left: CW / 2 - 52 + "px", top: "38px", transformOrigin: "50% 50%" });
+    text(c1, cc.instagramTitle, "center ivy nowrap", { width: CW + "px", top: "164px", fontSize: fitSize(cc.instagramTitle, IVY5, 64, 840) + "px", fontWeight: 500, color: "var(--brown)", lineHeight: 1 });
+    const pills = cc.instagramHandles.map((hd, k) => chip(c1, hd, 44, 252 + k * 92, CW));
+    // WhatsApp community (with the link only when one is set)
+    const link = (cc.whatsappLink || "").trim();
+    const top2 = 456 + h1 + 40;
+    const c2 = div(r, cardStyle(top2, link ? 420 : 330));
     const wa = svg(c2, 108, 108, `<path d="M54 6 C27.5 6 6 27.5 6 54 C6 63 8.4 71.4 12.7 78.6 L6 102 L30.1 95.5 C37.1 99.4 45.3 102 54 102 C80.5 102 102 80.5 102 54 C102 27.5 80.5 6 54 6Z" fill="none" stroke="#AB5626" stroke-width="9" stroke-linejoin="round"/><path d="M38 32 C35 32 31 36 31 42 C31 54 45 74 63 77 C69 78 74 74 75 70 L76 65 L66 60 L61 66 C55 64 46 56 43 49 L49 44 L45 33Z" fill="#AB5626"/>`,
-      { left: "406px", top: "40px", transformOrigin: "50% 50%" });
-    text(c2, C.cta.whatsappTitle, "center ivy nowrap", { width: "920px", top: "168px", fontSize: fitSize(C.cta.whatsappTitle, IVY5, 60, 840) + "px", fontWeight: 500, color: "var(--brown)", lineHeight: 1 });
-    text(c2, C.cta.whatsappSub, "center gotham nowrap", { width: "920px", top: "244px", fontSize: fitSize(C.cta.whatsappSub, GOT4, 38, 840) + "px", color: "var(--brown)", lineHeight: 1.2 });
-    const ch2 = valueChip(c2, C.cta.whatsappLink, 40, 308);
-    ch2.style.width = "920px";
+      { left: CW / 2 - 54 + "px", top: "38px", transformOrigin: "50% 50%" });
+    text(c2, cc.whatsappTitle, "center ivy nowrap", { width: CW + "px", top: "166px", fontSize: fitSize(cc.whatsappTitle, IVY5, 60, 840) + "px", fontWeight: 500, color: "var(--brown)", lineHeight: 1 });
+    text(c2, cc.whatsappSub, "center gotham nowrap", { width: CW + "px", top: "244px", fontSize: fitSize(cc.whatsappSub, GOT4, 38, 840) + "px", color: "var(--brown)", lineHeight: 1.2 });
+    if (link) chip(c2, link, 38, 316, CW);
     return Object.assign(sc, {
-      len: 4.8,
+      len: 5.4,
       update(t) {
         tf(mand, { r: t * 5 });
         tf(gard, { y: -6 * t });
-        fadeUp(h, t, 0.3);
-        let p = ease.out(prog(t, 0.55, 0.8));
+        fadeUp(h, t, 0.35);
+        let p = ease.out(prog(t, 0.6, 0.9));
         tf(c1, { y: (1 - p) * 90, o: p });
-        p = ease.out(prog(t, 0.95, 0.8));
+        pills.forEach((pl, k) => fadeUp(pl, t, 1.1 + k * 0.18, { dist: 16, blur: 4 }));
+        p = ease.out(prog(t, 1.2, 0.9));
         tf(c2, { y: (1 - p) * 90, o: p });
-        tf(ig, { s: 1 + 0.06 * Math.max(0, Math.sin((t - 1.2) * 4)) });
-        tf(wa, { s: 1 + 0.06 * Math.max(0, Math.sin((t - 1.6) * 4)) });
+        tf(ig, { s: 1 + 0.06 * Math.max(0, Math.sin((t - 1.4) * 4)) });
+        tf(wa, { s: 1 + 0.06 * Math.max(0, Math.sin((t - 2.0) * 4)) });
       },
     });
   }
@@ -544,13 +593,12 @@
     const names = `${C.couple.groomFull} & ${C.couple.brideFull}`;
     const nm = text(r, names, "center ivy glow nowrap", { top: "512px", fontSize: fitSize(names, IVY, 64, 760) + "px", color: "var(--brown)", lineHeight: 1 });
     const dt = text(r, `${C.dates.range} ${C.dates.monthYear}`, "center gotham caps glow nowrap", { top: "604px", fontSize: "32px", fontWeight: 500, letterSpacing: ".3em", textIndent: ".3em", color: "var(--copper)", lineHeight: 1 });
-    const hs = text(r, C.hashtag, "center ivy glow nowrap", { top: "660px", fontSize: "46px", color: "var(--copper)", lineHeight: 1 });
     return Object.assign(sc, {
-      len: 4.7,
+      len: 5.0,
       update(t) {
         skyU(t);
         flyU(t);
-        tf(ele, { s: 1 + 0.045 * ease.sine(clamp(t / 4.7)), x: -14 * t });
+        tf(ele, { s: 1 + 0.045 * ease.sine(clamp(t / 5.0)), x: -13 * t });
         twk(t);
         const strike = 4 * Math.exp(-t / 1.4);
         hang.forEach((h) => h.update(t, strike));
@@ -558,7 +606,39 @@
         fadeUp(a2, t, 0.95);
         fadeUp(nm, t, 1.35);
         fadeUp(dt, t, 1.65);
-        fadeUp(hs, t, 1.9);
+      },
+    });
+  }
+
+  // the couple's monogram on a deep brown card, the last frame of the reel
+  const LOGO = { w: 1280, h: 1067 };
+  function logoCard() {
+    const sc = scene(), r = sc.root;
+    r.style.background = "radial-gradient(ellipse at 50% 40%, #50210D 0%, #2E1107 48%, #140703 100%)";
+    const mand = mandala(r, 540, 760, 520, "#DDA45D", 0.12);
+    const tw = sparkles(r, 4242, 28, [40, 180, 1040, 1500], "#F6D592");
+    const hang = [hanger(r, "bell", 110, 2.3, 0.4, 2.4), hanger(r, "bell", 970, 2.3, 1.6, 2.4)];
+    const lw = 800, lh = Math.round((lw * LOGO.h) / LOGO.w), lt = 400;
+    const logo = img(r, "assets/brand/logo.webp", { left: (W - lw) / 2 + "px", top: lt + "px", width: lw + "px", height: lh + "px", transformOrigin: "50% 50%" });
+    const shine = div(r, { left: (W - lw) / 2 + "px", top: lt + "px", width: lw + "px", height: lh + "px", opacity: 0,
+      WebkitMaskImage: "url(assets/brand/logo.webp)", maskImage: "url(assets/brand/logo.webp)", WebkitMaskSize: "100% 100%", maskSize: "100% 100%",
+      backgroundImage: "linear-gradient(105deg, rgba(255,255,255,0) 44%, rgba(255,248,226,.85) 50%, rgba(255,255,255,0) 56%)", backgroundSize: "300% 100%", backgroundRepeat: "no-repeat" }, "abs");
+    const hs = text(r, C.hashtag, "center ivy nowrap", { top: lt + lh + 64 + "px", fontSize: fitSize(C.hashtag, IVY, 58, 860) + "px", color: "#EBC47F", lineHeight: 1 });
+    const dt = text(r, `${C.dates.range} ${C.dates.monthYear}`, "center gotham caps nowrap", { top: lt + lh + 150 + "px", fontSize: "32px", fontWeight: 500,
+      letterSpacing: ".3em", textIndent: ".3em", color: "#DDA45D", lineHeight: 1 });
+    return Object.assign(sc, {
+      len: 4.0,
+      update(t) {
+        tf(mand, { r: t * 6, o: 0.12 * ease.out(prog(t, 0.2, 1.2)) });
+        tw(t);
+        hang.forEach((h) => h.update(t, 3.5 * Math.exp(-(Math.max(0, t - 0.35)) / 1.4) * (t > 0.35 ? 1 : 0.3)));
+        const p = ease.out(prog(t, 0.3, 1.3));
+        tf(logo, { s: lerp(0.92, 1, p), o: p, blur: (1 - p) * 12 });
+        const q = prog(t, 1.6, 1.1);
+        shine.style.opacity = (Math.sin(Math.PI * q) * 0.95).toFixed(3);
+        shine.style.backgroundPosition = `${lerp(110, -10, q).toFixed(2)}% 0`;
+        fadeUp(hs, t, 1.3);
+        fadeUp(dt, t, 1.6);
       },
     });
   }
@@ -566,13 +646,17 @@
   // ---------- timeline ----------
   let S = [], scrollRod, flash, vignette, total = 0;
   function build() {
+    // created in screen order: each scene sits above the one it transitions from
+    let clo, card;
     const list = [
-      [intro(), null],
-      [couple(), "dissolve"],
-      ...C.events.map((ev, i) => [eventScene(ev, i), ["scroll", "dissolve", "push", "glow", "scroll", "dissolve"][i]]),
+      [opening(), null],
+      [intro(), "dissolve"],
+      [couple(), "iris"],
+      ...C.events.map((ev, i) => [eventScene(ev, i), ["scroll", "wipe", "glow", "push", "iris", "wipe"][i]]),
       [saveTheDate(), "glow"],
       [cta(), "scroll"],
-      [closing(), "dissolve"],
+      [(clo = closing()), "dissolve"],
+      [(card = logoCard()), "dissolve"],
     ];
     let t0 = 0;
     S = list.map(([s, tr], i) => {
@@ -582,6 +666,14 @@
       return o;
     });
     total = t0;
+    // sound effects on the timeline (seconds from the start), read by render.cjs
+    const at = (sc) => S.find((o) => o.s === sc).t0;
+    window.SFX = [
+      ...OPEN_STRIKES.map((s) => ({ t: s.t, rate: s.rate, gain: s.gain })),
+      { t: at(clo) + 0.15, rate: 0.9, gain: 0.45 },
+      { t: at(card) + 0.35, rate: 1.0, gain: 0.55 },
+    ];
+    window.MUSIC_START = 2.4;
     vignette = div(stage, { background: "radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 58%, rgba(70,25,8,.24) 100%)", pointerEvents: "none" }, "layer");
     flash = div(stage, { background: "radial-gradient(circle at 50% 45%, rgba(255,250,240,1) 0%, rgba(255,228,170,.75) 40%, rgba(255,228,170,0) 78%)", opacity: 0 }, "layer");
     scrollRod = svg(stage, W, 60, `
@@ -600,24 +692,37 @@
       root.style.display = vis ? "block" : "none";
       if (!vis) return;
       o.s.update(t - o.t0);
-      let op = 1, tr = "", clip = "none";
+      let op = 1, tr = "", clip = "none", mask = "none";
       const p = o.tr ? clamp((t - o.t0) / TD) : 1;
       if (o.tr && p < 1) {
         const e = ease.inOut(p);
         if (o.tr === "dissolve") { op = e; tr = `scale(${lerp(1.04, 1, e).toFixed(4)})`; }
-        if (o.tr === "glow") { op = e; fl = Math.max(fl, Math.sin(Math.PI * p) * 0.85); }
+        if (o.tr === "glow") { op = e; fl = Math.max(fl, Math.sin(Math.PI * p) * 0.8); }
         if (o.tr === "scroll") { clip = `inset(${((1 - e) * 100).toFixed(3)}% 0 0 0)`; rod = (1 - e) * H; }
         if (o.tr === "push") tr = `translateY(${((1 - e) * H).toFixed(1)}px)`;
+        if (o.tr === "iris") {
+          // a soft-edged circle opening from the centre
+          const rr = lerp(-320, 1500, e);
+          mask = `radial-gradient(circle at 50% 46%, #000 ${rr.toFixed(1)}px, rgba(0,0,0,0) ${(rr + 320).toFixed(1)}px)`;
+          tr = `scale(${lerp(1.05, 1, e).toFixed(4)})`;
+        }
+        if (o.tr === "wipe") {
+          // a soft diagonal sweep from the top-left corner
+          const pp = lerp(-35, 100, e);
+          mask = `linear-gradient(160deg, #000 ${pp.toFixed(2)}%, rgba(0,0,0,0) ${(pp + 35).toFixed(2)}%)`;
+        }
       }
       const n = S[i + 1];
       if (n && t >= n.t0) {
         const q = ease.inOut(clamp((t - n.t0) / TD));
         if (n.tr === "push") tr += ` translateY(${(-q * H * 0.3).toFixed(1)}px)`;
-        if (n.tr === "scroll") tr += ` translateY(${(-q * 140).toFixed(1)}px)`;
+        else if (n.tr === "scroll") tr += ` translateY(${(-q * 140).toFixed(1)}px)`;
+        else tr += ` scale(${lerp(1, 1.04, q).toFixed(4)})`; // keep the outgoing picture moving under the incoming one
       }
       root.style.opacity = op.toFixed(3);
       root.style.transform = tr || "none";
       root.style.clipPath = clip;
+      root.style.webkitMaskImage = root.style.maskImage = mask;
     });
     flash.style.opacity = fl.toFixed(3);
     if (rod === null) scrollRod.style.display = "none";
@@ -630,11 +735,13 @@
       document.fonts.load('400 40px "Gotham"'), document.fonts.load('500 40px "Gotham"'),
     ]);
     CARDS = await (await fetch(P + "cards.json")).json();
+    DOORS = await (await fetch(P + "doors/doors.json")).json();
     build();
     await Promise.all(pending);
     window.DURATION = total;
     window.seek = seek;
     window.SCHEDULE = S.map((o) => ({ t0: +o.t0.toFixed(2), t1: +o.t1.toFixed(2), tr: o.tr }));
+    window.AUDIO = { sfx: window.SFX, musicStart: window.MUSIC_START };
     const q = new URLSearchParams(location.search).get("t");
     seek(q ? parseFloat(q) : 0);
     return total;

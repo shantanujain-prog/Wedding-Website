@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Render the Save the Date reel (1080x1920, 30 fps, H.264 + AAC) from scene.html.
 //
-//   node video/render.cjs                      # full video -> video/out/save-the-date.mp4
+//   node video/render.cjs                      # full video -> video/out/save-the-date.mp4 (60 s)
 //   node video/render.cjs --stills 1,12.5,40   # PNG frames at those seconds -> video/out/stills/
 //   node video/render.cjs --from 10 --to 14    # render only part of the timeline
 //   node video/render.cjs --no-audio
@@ -25,6 +25,7 @@ const FPS = +opt("fps", 30);
 const OUT = path.resolve(opt("out", path.join(ROOT, "out", "save-the-date.mp4")));
 const SONG = path.join(ROOT, "..", "custom", "wedding-song.mp3");
 const SONG_START = +opt("song-start", 9); // seconds into the song (its intro is near-silent)
+const BELL = path.join(ROOT, "assets", "audio", "bell.mp3"); // the website's bell sound
 const stills = opt("stills", null);
 
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".webp": "image/webp", ".jpg": "image/jpeg", ".png": "image/png", ".woff2": "font/woff2" };
@@ -50,6 +51,7 @@ function serve() {
   await page.goto(url);
   const duration = await page.evaluate(() => window.ready);
   const schedule = await page.evaluate(() => window.SCHEDULE);
+  const AUDIO = await page.evaluate(() => window.AUDIO);
   console.log(`duration ${duration.toFixed(2)} s`);
   console.log(schedule.map((s, i) => `  #${i} ${s.t0.toFixed(2)}–${s.t1.toFixed(2)} ${s.tr || ""}`).join("\n"));
   const cdp = await page.context().newCDPSession(page);
@@ -73,11 +75,23 @@ function serve() {
     fs.mkdirSync(path.dirname(OUT), { recursive: true });
     const audio = !args.includes("--no-audio") && fs.existsSync(SONG);
     const len = frames / FPS;
+    // music fades in at AUDIO.musicStart; the website's bell plays at each AUDIO.sfx strike
+    const sfx = AUDIO.sfx.filter((s) => s.t >= from && s.t < to);
+    const musicAt = Math.max(0, AUDIO.musicStart - from);
+    const graph = [
+      `[1:a]aresample=48000,aformat=channel_layouts=stereo,adelay=${Math.round(musicAt * 1000)}:all=1,afade=t=in:st=${musicAt.toFixed(2)}:d=2.5[song]`,
+    ];
+    if (sfx.length) graph.push(`[2:a]aresample=48000,aformat=channel_layouts=stereo,asplit=${sfx.length}${sfx.map((_, i) => `[s${i}]`).join("")}`);
+    sfx.forEach((s, i) => graph.push(
+      `[s${i}]asetrate=${Math.round(48000 * s.rate)},aresample=48000,apad=pad_dur=2.5,` +
+      `aecho=0.8:0.55:70|150|240:0.32|0.2|0.12,volume=${(2.1 * s.gain).toFixed(2)},adelay=${Math.round((s.t - from) * 1000)}:all=1[b${i}]`));
+    graph.push(`[song]${sfx.map((_, i) => `[b${i}]`).join("")}amix=inputs=${sfx.length + 1}:normalize=0:duration=first,` +
+      `atrim=0:${len.toFixed(3)},afade=t=out:st=${Math.max(0, len - 3).toFixed(2)}:d=3,alimiter=limit=0.95[a]`);
     const ff = spawn("ffmpeg", [
       "-y", "-loglevel", "error",
       "-f", "image2pipe", "-framerate", String(FPS), "-c:v", "png", "-i", "-",
-      ...(audio ? ["-ss", String(SONG_START + from), "-t", String(len), "-i", SONG,
-        "-filter_complex", `[1:a]afade=t=in:st=0:d=1.2,afade=t=out:st=${Math.max(0, len - 2.5).toFixed(2)}:d=2.5,aresample=48000[a]`,
+      ...(audio ? ["-ss", String(SONG_START + Math.max(0, from - AUDIO.musicStart)), "-t", String(len + 1), "-i", SONG, "-i", BELL,
+        "-filter_complex", graph.join(";"),
         "-map", "0:v", "-map", "[a]", "-c:a", "aac", "-b:a", "192k", "-ar", "48000"] : []),
       "-c:v", "libx264", "-preset", "slow", "-crf", "17", "-pix_fmt", "yuv420p", "-profile:v", "high", "-level", "4.2",
       "-r", String(FPS), "-movflags", "+faststart", OUT,

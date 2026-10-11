@@ -1,74 +1,71 @@
 # Save the Date reel
 
-A 43.5-second, 1080×1920 (9:16) Instagram Reels video for Shantanu & Dr. Pragati,
-built from the wedding website's own artwork and fonts plus the five invitation
-illustrations. Output: `video/out/save-the-date.mp4` (H.264, 30 fps, AAC 48 kHz),
-plus `video/out/cover.jpg` (the intro at 3.6 s) to use as the Reel's cover.
-
-Event cards and the call to action stay between y≈120 and y≈1400, clear of the
-Reels caption and buttons at the bottom of the screen.
+A 60-second, 1080×1920 (9:16) Instagram Reels video for Shantanu & Dr. Pragati,
+built from the wedding website's artwork and fonts, the invitation illustrations,
+the door and invocation frames, and the couple's monogram.
+Output: `video/out/save-the-date.mp4` (H.264, 30 fps, AAC 48 kHz), plus
+`video/out/cover.jpg` to use as the Reel's cover.
 
 ## Timeline
 
 | Time (s) | Scene | Transition in |
 | --- | --- | --- |
-| 0.0 – 5.6 | **Intro**: ॥ श्री महावीराय नमः ॥, "Shantanu *weds* Pragati", invitation line; marigold torans, swaying bells, turning mandala, Sanchi stupa with layered parallax (sky, sun, clouds, mountains), birds | — |
-| 5.0 – 10.6 | **Meet the couple**: Shantanu, Product Manager, Paytm; Dr. Pragati, Pediatrician, AIIMS New Delhi; parents' names; peacock arbor | dissolve |
-| 10.0 – 13.9 | **Mehndi**: Thursday 17 December 2026 · 3 PM onwards · Home, Vidisha | scroll reveal |
-| 13.3 – 17.2 | **Dev Darshan**: Friday 18 December 2026 · 8 AM onwards · Home, Vidisha | dissolve |
-| 16.6 – 20.5 | **Haldi**: Saturday 19 December 2026 · Noon onwards · Magadham Grande, Sanchi | push up |
-| 19.9 – 23.8 | **Sangeet Night**: Saturday 19 December 2026 · 7 PM onwards · Magadham Grande, Sanchi | golden glow |
-| 23.2 – 27.1 | **Reception**: Sunday 20 December 2026 · Noon onwards · Magadham Grande, Sanchi | scroll reveal |
-| 26.5 – 30.4 | **Shaadi**: Sunday 20 December 2026 · 2 PM onwards · Magadham Grande, Sanchi | dissolve |
-| 29.8 – 35.2 | **Save the Date**: 17 – 20 December 2026, Thu–Sun calendar, #SchoolmatesToSoulmates, floating photo frames | golden glow |
-| 34.6 – 39.4 | **Call to action**: Follow us on Instagram; Join the WhatsApp community for virtual or in-person celebrations | scroll reveal |
-| 38.8 – 43.5 | **Closing**: "Awaiting your presence", elephant in the lotus pond, swaying bells, birds | dissolve |
+| 0.0 – 9.2 | **Doors → invocation**: the carved doors stand closed, bells ring (the website's bell sound, four strikes) and swing, the doors swing open in 3D, light spills out, and the camera passes through the doorway into the invocation (Mahavir, Mangalam shlok, "Jains cordially invites you to the wedding of"), with falling petals and a shimmer across the shlok | — |
+| 8.3 – 14.3 | **Names**: ॥ श्री महावीराय नमः ॥, "Shantanu *weds* Pragati", #SchoolmatesToSoulmates, torans, swaying bells, mandala, Sanchi stupa with layered parallax, birds | dissolve |
+| 13.4 – 19.6 | **Meet the couple**: Shantanu, Product Manager, Paytm; Dr. Pragati, Pediatrician, AIIMS New Delhi; parents' names; peacock arbor | iris |
+| 18.7 – 23.5 | **Mehndi**: Thursday 17 December 2026 · 3 PM onwards · Home, Vidisha | scroll reveal |
+| 22.6 – 27.4 | **Dev Darshan**: Friday 18 December 2026 · 8 AM onwards · Home, Vidisha | soft wipe |
+| 26.5 – 31.3 | **Haldi**: Saturday 19 December 2026 · Noon onwards · Magadham Grande, Sanchi | golden glow |
+| 30.4 – 35.2 | **Sangeet Night**: Saturday 19 December 2026 · 7 PM onwards · Magadham Grande, Sanchi | push up |
+| 34.3 – 39.1 | **Reception**: Sunday 20 December 2026 · Noon onwards · Magadham Grande, Sanchi | iris |
+| 38.2 – 43.0 | **Shaadi**: Sunday 20 December 2026 · 2 PM onwards · Magadham Grande, Sanchi | soft wipe |
+| 42.1 – 48.3 | **Save the Date**: 17 – 20 December 2026, Thu–Sun calendar, #SchoolmatesToSoulmates, floating photo frames | golden glow |
+| 47.4 – 52.8 | **Call to action**: Follow us on Instagram (@hello.shantanu, @jainpragati23); Join the WhatsApp community for virtual or in-person celebrations | scroll reveal |
+| 51.9 – 56.9 | **Closing**: "Awaiting your presence", the elephant in the lotus pond, swaying bells, birds | dissolve |
+| 56.0 – 60.0 | **Monogram**: the SP logo on a deep brown card with a gold shimmer, #SchoolmatesToSoulmates, 17 – 20 December 2026, swaying bells | dissolve |
 
-Background music is the website's song (`custom/wedding-song.mp3`), from 0:09,
-with a 1.2 s fade-in and a 2.5 s fade-out.
+Transitions last 0.9 s with eased in/out motion; the outgoing picture keeps
+drifting while the next one arrives.
 
-## Placeholders to supply before publishing
+**Sound:** the website's bell (`assets/audio/bell.mp3`) rings four times while the
+doors open (at 0.25, 1.15, 2.05 and 2.9 s, each at a different pitch, with a
+short reverb tail), once as the closing scene's bells swing and once when the
+monogram appears. The website's song (`custom/wedding-song.mp3`, from 0:09)
+fades in from 2.4 s and fades out over the last 3 s.
 
-| # | Placeholder | Where | How to replace |
-| --- | --- | --- | --- |
-| 1 | `@INSTAGRAM_HANDLE` | Call to action | `cta.instagramHandle` in `config.js`: replace `PLACEHOLDER("…")` with a string, e.g. `"@shantanu.weds.pragati"` |
-| 2 | `WHATSAPP_COMMUNITY_LINK` | Call to action | `cta.whatsappLink` in `config.js` (a short link reads best, e.g. `"chat.whatsapp.com/…"`) |
-| 3 | Shaadi illustration | Shaadi scene | No Shaadi invitation was supplied. The scene uses the site's mandap, chhatri garden, torans and bells, tagged "PLACEHOLDER ART". Add `assets/invites/shaadi.jpg` (same 9:16 style as the others), add its card box to `CARDS` in `prep.py`, set `art: "shaadi"` in `config.js`, run `prep.py` |
-| 4 | Venue photographs (Magadham Grande) | Sanchi scenes | Not received. Haldi, Sangeet and Reception use the invitation artwork. Send them if they should appear, e.g. as floating frames |
-| 5 | `WEBSITE_VIDEO_BRIEF.md` | — | Not received. The video follows the summary in the request |
+## Content
 
-Placeholders render as dashed chips with a red "PLACEHOLDER" tag so they cannot
-pass for final content. Once all are filled in, set `showPlaceholderTags: false`.
+All text is in `config.js`: names, roles, parents, the six events, hashtag,
+Instagram handles and the WhatsApp line. `cta.whatsappLink` is empty, so the
+WhatsApp card shows no link; set it (e.g. `"chat.whatsapp.com/…"`) and re-render
+to add one as a pill under the line.
 
-## Printed invitation text vs. the schedule
-
-The video does **not** show the text printed on the invitations. `prep.py`
-erases each printed card and the video draws a new card with the schedule from
-`config.js`, because the printed cards differ from it:
-
-- Mehndi: printed "Bride & Groom Residences, Vidisha"; video "Home, Vidisha"
-- Dev Darshan: printed "Jain Temple, Vidisha"; video "Home, Vidisha"
-- Haldi: printed "Poolside, Magadham Grande Resort"; video "Magadham Grande, Sanchi"
-- Sangeet / Reception: printed "Big Lawn, Magadham Grande Resort"; video "Magadham Grande, Sanchi"
+The event cards do not show the text printed on the invitations. `prep.py`
+erases each printed card and the video draws a new one with the schedule from
+`config.js`, because some printed details differ from it (e.g. Dev Darshan's
+card says "Jain Temple, Vidisha", Shaadi's says "Imperial Hall, Magadham Grande
+Resort").
 
 ## Rebuild
 
 Requires Node 18+, Playwright with Chromium, ffmpeg, and Python 3 with Pillow and numpy.
 
 ```sh
-python3 video/prep.py                       # clean plates + couple crops (only after changing invitations)
-node video/render.cjs                       # full video, about 5 minutes
-node video/render.cjs --stills 3,12,31,41   # PNG frames to check a change quickly
-node video/render.cjs --from 29 --to 36     # part of the timeline
+python3 video/prep.py                       # plates, couple crops, door layers, logo (after changing artwork)
+node video/render.cjs                       # full video, about 6 minutes
+node video/render.cjs --stills 2.3,30,59    # PNG frames to check a change quickly
+node video/render.cjs --from 40 --to 50     # part of the timeline
 ```
 
 | File | What it is |
 | --- | --- |
-| `config.js` | All text: names, roles, the six events, hashtag, CTA, placeholders |
-| `scene.html`, `scene.js` | The animation; every frame is a function of time (`window.seek(t)`) |
-| `render.cjs` | Serves the folder, steps Chromium through each frame, pipes PNGs to ffmpeg |
-| `prep.py` | Removes the printed cards from the invitations; cuts the couple close-ups |
-| `assets/site/` | Artwork from the website (stupa, torans, bells, peacocks, mandap, elephant pond, ornaments) |
+| `config.js` | All text |
+| `scene.html`, `scene.js` | The animation; every frame is a function of time (`window.seek(t)`); also exports the sound cues |
+| `render.cjs` | Serves the folder, steps Chromium through each frame, pipes PNGs to ffmpeg and mixes the song and bells |
+| `prep.py` | Erases the printed cards from the invitations, cuts couple close-ups, splits the closed doors into frame, leaves and bells, keys the logo |
+| `assets/site/` | Artwork from the website (stupa, torans, bells, peacocks, elephant pond, ornaments) |
 | `assets/fonts/` | The website's fonts: IvyOra Display, Brother Signature, Gotham |
-| `assets/invites/` | The five supplied invitation illustrations |
+| `assets/invites/` | The supplied invitation illustrations, the door triptych and the invocation frame |
+| `assets/brand/` | The SP monogram (original and keyed) |
+| `assets/audio/` | The website's bell sound |
 | `assets/plates/` | Generated by `prep.py` |
