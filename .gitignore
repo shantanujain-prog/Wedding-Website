@@ -6,3 +6,4 @@ server.log
 video/out/stills/
 video/assets/plates/*-debug.jpg
 video/assets/plates/doors/debug.jpg
+__pycache__/
