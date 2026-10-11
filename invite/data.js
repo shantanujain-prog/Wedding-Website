@@ -2,13 +2,14 @@
 //
 // PH(id) marks a detail that is not supplied yet. It prints as a clearly marked
 // placeholder, and the last page lists every one. Replace each PH(...) with the
-// real text (a string) — or, for map links, a URL string — then build again.
+// real text (a string) — or, for map links, a URL string, or a list of them
+// (["https://…", "https://…"] or [["Groom's residence", "https://…"], …]) — then build again.
 // `node invite/build.cjs --final` refuses to build while any placeholder is left.
 const PH = (id) => ({ placeholder: id });
 
 window.PLACEHOLDERS = {
-  RES_ADDR: "Bride & Groom Residences — full address(es) in Vidisha",
-  RES_MAP: "Map link — Bride & Groom Residences",
+  RES_ADDR: "Bride & Groom Residences — full address(es) in Vidisha, and which residence guests should attend (or both)",
+  RES_MAP: "Map link(s) — Bride & Groom Residences (one per residence)",
   RES_LOCAL: "Directions within Vidisha to the Bride & Groom Residences (landmark / route)",
   TEMPLE_ADDR: "Jain Temple, Vidisha — full address",
   TEMPLE_MAP: "Map link — Jain Temple, Vidisha",
@@ -19,6 +20,13 @@ window.PLACEHOLDERS = {
   VIDISHA_SANCHI: "Distance and drive time, Vidisha to Magadham Grande, Sanchi",
   VIDISHA_TRANSPORT: "Transport for the Vidisha functions (Mehndi, Dev Darshan), if any",
 };
+
+// Taken as supplied, but worth a yes before printing (listed on the placeholder page, with the
+// website's travel lines and the route sentences below, which were written from the address).
+window.CONFIRM = [
+  ["Wording", "is kept exactly as supplied: Mehndi “…where love glooms.” (blooms?); Reception “Two of us & all you join us…” (all of you?)."],
+  ["Dress code", "lists “Groom” and “Bride” for each function, as supplied. Is that what the couple will wear, or the dress code for men and women guests (or for the groom’s and bride’s sides)? The heading and labels can then be worded to match."],
+];
 
 const SANCHI = {
   name: "Magadham Grande (Magdham Resort)",
@@ -38,7 +46,7 @@ window.INVITE = {
     brideParents: "Daughter of Shri. Santosh Jain & Smt. Sarita Jain",
   },
   // wording of the website's invitation
-  invitation: "Jain's cordially invites you to the wedding celebration of our beloved son and daughter",
+  invitation: "Jain’s cordially invites you to the wedding celebration of our beloved son and daughter",
   dates: "17 – 20 December 2026",
   places: "Vidisha & Sanchi · Madhya Pradesh",
   hashtag: "#SchoolmatesToSoulmates",

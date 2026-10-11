@@ -33,6 +33,12 @@ CROPS = {
 }
 
 
+# where the scenery behind a printed card is soft bokeh, a patch of it (900x1600 pixels) to fill the card's gap
+BOKEH = {
+    "dev-darshan": (455, 770, 560, 880),
+}
+
+
 def main():
     poly = prep.silhouette()
     out = os.path.join(HERE, "assets", "art")
@@ -48,11 +54,37 @@ def main():
         ImageDraw.Draw(mask).polygon([(box[0] + x * bw, box[1] + y * bh) for x, y in prep.grow(poly, 1.03)], fill=255)
         hole = np.asarray(mask) > 0
         arr = np.asarray(src).astype(np.float64)
-        filled = prep.push_pull(arr, (~hole).astype(np.float64))
+        # Behind the card the artwork is soft foliage and sky; take the fill colour from that, not
+        # from the couple's dark hair just below the card (which would smear brown into the gap).
+        lum = arr @ np.array([0.299, 0.587, 0.114])
+        near = np.asarray(mask.filter(ImageFilter.MaxFilter(2 * round(30 * sx) + 1))) > 0
+        known = ~hole & ~(near & (lum < 95))
+        filled = prep.push_pull(arr, known.astype(np.float64))
         arr[hole] = filled[hole]
+        if name in BOKEH:
+            # out-of-focus scenery behind the card: stretch a sample of the real background over the
+            # gap and blur it like the rest of the bokeh
+            bl, bt, br, bb = [round(v * s) for v, s in zip(BOKEH[name], (sx, sy, sx, sy))]
+            ys, xs = np.where(hole)
+            hx0, hy0, hx1, hy1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
+            sample = src.crop((bl, bt, br, bb)).resize((hx1 - hx0, hy1 - hy0), Image.BICUBIC).filter(ImageFilter.GaussianBlur(9 * sx))
+            patch = np.asarray(sample).astype(np.float64)
+            # blend from the surrounding colour (the push-pull fill) at the gap's edge to the bokeh inside it
+            depth = np.zeros(hole.shape)
+            m = mask
+            for _ in range(8):
+                m = m.filter(ImageFilter.MinFilter(5))
+                depth += np.asarray(m) > 0
+            w = np.clip(depth / 8, 0, 1)[hy0:hy1, hx0:hx1, None]
+            region = arr[hy0:hy1, hx0:hx1]
+            sel = hole[hy0:hy1, hx0:hx1]
+            region[sel] = (region * (1 - w) + patch * w)[sel]
+            arr[hy0:hy1, hx0:hx1] = region
         clean = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
-        soft = clean.filter(ImageFilter.GaussianBlur(12 * sx))
-        clean = Image.composite(soft, clean, mask.filter(ImageFilter.GaussianBlur(4 * sx)))
+        soft = clean.filter(ImageFilter.GaussianBlur(10 * sx))
+        # soften only inside the erased area, so the hair at its edge stays sharp
+        inner = mask.filter(ImageFilter.MinFilter(2 * round(3 * sx) + 1)).filter(ImageFilter.GaussianBlur(3 * sx))
+        clean = Image.composite(soft, clean, inner)
         crop = clean.crop((round(l * sx), round(t * sy), round(r * sx), round(b * sy)))
         crop.save(os.path.join(out, name + ".jpg"), quality=92)
         print(name, crop.size)

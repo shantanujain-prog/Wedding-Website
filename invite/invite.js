@@ -1,6 +1,14 @@
 // Builds the e-invite pages from data.js. build.cjs prints this page to PDF.
 (() => {
   const D = window.INVITE, PHS = window.PLACEHOLDERS;
+  const params = new URLSearchParams(location.search);
+  // ?bleed: the print-shop version, each page 3 mm (8.5 pt) larger on every side; the trimmed page is unchanged
+  if (params.has("bleed")) {
+    document.documentElement.style.setProperty("--bleed", "8.5pt");
+    const st = document.createElement("style");
+    st.textContent = "@page { size: 437pt 612pt; margin: 0; }";
+    document.head.appendChild(st);
+  }
   const SITE = "../video/assets/site/";
   const used = new Map(); // placeholder id -> { no, where:Set }
   let where = "";
@@ -50,19 +58,28 @@
   }
   const divider = (w = 46) => `<svg class="divider" style="width:${w}mm;height:3mm" viewBox="0 0 ${w * 10} 30"><path d="M0 15 L${w * 5 - 26} 15 M${w * 5 + 26} 15 L${w * 10} 15" stroke="#C99047" stroke-width="2"/><path d="M${w * 5} 3 L${w * 5 + 12} 15 L${w * 5} 27 L${w * 5 - 12} 15Z" fill="#DDA45D"/></svg>`;
   const pin = `<svg viewBox="0 0 22 30" style="width:5.2mm;height:7mm;margin-top:1mm"><path d="M11 0 C4.9 0 0 4.9 0 11 C0 19 11 30 11 30 C11 30 22 19 22 11 C22 4.9 17.1 0 11 0Z" fill="#AB5626"/><circle cx="11" cy="11" r="4.2" fill="#FFF8EE"/></svg>`;
+  function mapLinks(m) {
+    if (isPh(m)) return val(m);
+    return (Array.isArray(m) ? m : [m]).map((l) => {
+      const [label, url] = Array.isArray(l) ? l : ["Open in Google Maps", l];
+      return `<a href="${esc(url)}">${esc(label)}</a> <span class="url">${esc(url)}</span>`;
+    }).join("<br>");
+  }
+  // keep a bracketed aside on one line: "Magadham Grande (Magdham Resort)"
+  const keepAside = (s) => esc(s).replace(/\(([^)]*)\)/g, '<span class="nowrap">($1)</span>');
   const star = (x, y) => `<svg class="corner" style="left:${x}mm;top:${y}mm" viewBox="0 0 60 60"><path d="M30 0 L36 23 L60 30 L36 37 L30 60 L24 37 L0 30 L24 23Z" fill="#DDA45D"/></svg>`;
 
   let pageNo = 0;
   function page(cls, inner, { footer = true, bells = true, mand = [74, 112, 62] } = {}) {
     pageNo++;
-    return `<section class="page ${cls}">
+    return `<section class="page ${cls}"><div class="trim">
       ${mand ? mandala(...mand) : ""}
       <div class="frame"></div>${star(2.6, 102.5)}${star(140.4, 102.5)}
       ${garland()}
       ${bells ? `<img class="bell" style="left:9.5mm" src="${SITE}chain-bell.webp"><img class="bell" style="right:9.5mm" src="${SITE}chain-bell.webp">` : ""}
       <div class="content">${inner}</div>
       ${footer ? `<div class="footer">${esc(D.hashtag)}<span class="no">${pageNo}</span></div>` : ""}
-    </section>`;
+    </div></section>`;
   }
 
   // ---------- pages ----------
@@ -73,7 +90,7 @@
       <img class="shri" src="${SITE}shri-mahaviraya.webp" alt="॥ श्री महावीराय नमः ॥">
       <img class="shlok" src="assets/mangalam-shlok.webp" alt="Mangalam shlok">
       <div class="invite center ivy">${esc(D.invitation)}</div>
-      <div class="center" style="position:absolute;left:10mm;right:10mm;top:66mm">
+      <div class="center" style="position:absolute;left:10mm;right:10mm;top:63mm">
         <div class="name">${esc(c.groom)}</div>
         <div class="parents">${esc(c.groomParents)}</div>
         <div class="weds">weds</div>
@@ -90,7 +107,7 @@
     where = "Schedule page";
     const rows = D.events.map((e) => {
       const [dd, mon] = e.date.split(" ");
-      const venue = e.venue.sanchi ? `${esc(e.venue.place)}<br>${esc(e.venue.town)}` : `${esc(e.venue.place)}<br>${esc(e.venue.town)}`;
+      const venue = `${esc(e.venue.place)}<br>${esc(e.venue.town)}`;
       return `<div class="row">
         <div class="date"><div class="label" style="letter-spacing:.18em">${esc(e.day.slice(0, 3))}</div><div class="d">${esc(dd)}</div><div class="label" style="letter-spacing:.18em">${esc(mon.slice(0, 3))}</div></div>
         <div class="ev">${esc(e.name)}${e.tag ? ` <span style="font-weight:400;font-size:10pt">(${esc(e.tag)})</span>` : ""}<small>${esc(e.time)}</small></div>
@@ -98,16 +115,16 @@
     }).join("");
     const s = D.sanchi;
     return page("glance", `
-      <div class="center" style="position:absolute;left:0;right:0;top:17mm">
+      <div class="center" style="position:absolute;left:12mm;right:12mm;top:17mm">
         <div class="sig" style="font-size:24pt;color:var(--copper);line-height:1">Wedding Timeline</div>
         <div class="label" style="margin-top:2.4mm">${esc(D.dates)}</div>
       </div>
       <div style="position:absolute;left:12mm;right:12mm;top:36mm">${rows}</div>
       <div style="position:absolute;left:12mm;right:12mm;top:149mm;display:grid;grid-template-columns:1fr 1fr;column-gap:4mm">
         <div class="box"><div class="label">Sanchi venue</div>
-          <p style="font-family:Ivy,serif;font-weight:500;font-size:10pt;color:var(--brown)">${esc(s.name)}</p>
-          <p>${s.address.map(val).join("<br>")}</p></div>
-        <div class="box"><div class="label">Arriving from out of town</div>
+          <p style="font-family:Ivy,serif;font-weight:500;font-size:10pt;color:var(--brown)">${keepAside(s.name)}</p>
+          <p>${s.address.map(val).join(", ")}</p></div>
+        <div class="box"><div class="label">From out of town</div>
           ${D.travel.map(([k, v]) => `<p><span class="k">${esc(k)}:</span> ${esc(v)}</p>`).join("")}</div>
       </div>`);
   }
@@ -116,17 +133,18 @@
     where = e.name;
     const v = e.venue;
     // address first, so placeholders are numbered in reading order
-    const addrHtml = v.sanchi ? `${esc(D.sanchi.name)}<br>${D.sanchi.address.map(val).join(", ")}` : v.address.map(val).join("<br>");
-    const map = v.sanchi ? D.sanchi.map : v.map;
-    const mapHtml = isPh(map) ? val(map) : `<a href="${esc(map)}">Open in Google Maps</a> <span style="font-size:7pt;opacity:.75">${esc(map)}</span>`;
+    const addrHtml = v.sanchi ? `${keepAside(D.sanchi.name)}<br>${D.sanchi.address.map(val).join(", ")}` : v.address.map(val).join("<br>");
+    const mapHtml = mapLinks(v.sanchi ? D.sanchi.map : v.map);
     const sw = e.swatches.length
       ? `<div class="swatches">${e.swatches.map(([n, c]) => `<span class="sw"><i ${c === "glitter" ? 'class="glitter"' : `style="background:${c}"`}></i>${esc(n)}</span>`).join("")}</div>` : "";
     const col = (title, lines) => `<div><div class="label">${title}</div>${lines.map((l) => `<p>${val(l)}</p>`).join("")}</div>`;
-    return page(`event ev-${e.art}`, `
-      <div class="count label center">Celebration ${i + 1} of ${D.events.length}</div>
-      <h1>${esc(e.name)}${e.tag ? ` <span class="temple">(${esc(e.tag)})</span>` : ""}</h1>
-      <div class="subtitle">${esc(e.subtitle)}</div>
-      <div class="when">${esc(e.day)} · ${esc(e.date)} · ${esc(e.time)}</div>
+    return page(`event ev-${e.art}`, `<div class="stack">
+      <div class="head">
+        <div class="label">Celebration ${i + 1} of ${D.events.length}</div>
+        <h1>${esc(e.name)}${e.tag ? ` <span class="temple">(${esc(e.tag)})</span>` : ""}</h1>
+        <div class="subtitle">${esc(e.subtitle)}</div>
+        <div class="when">${esc(e.day)} · ${esc(e.date)} · ${esc(e.time)}</div>
+      </div>
       <div class="mid">
         <div class="art"><img src="assets/art/${e.art}.jpg" alt=""></div>
         <div class="facts">
@@ -144,7 +162,7 @@
           <div class="map"><span class="k" style="font-weight:500;color:var(--copper)">Map:</span> ${mapHtml}</div>
         </div></div>
         <div class="go">${col("From Bhopal", e.directions.fromBhopal)}${col("From Vidisha", e.directions.fromVidisha)}</div>
-      </div>`, { mand: [74, 92, 56] });
+      </div></div>`, { mand: [74, 92, 56] });
   }
 
   function closing() {
@@ -157,7 +175,7 @@
         <div class="ivy" style="font-weight:500;font-size:15pt;letter-spacing:.14em;text-transform:uppercase;margin-top:2mm">${esc(rest.join(" "))}</div>
       </div>
       <div class="medal"><img src="assets/medal.jpg" alt="Shantanu & Pragati monogram"></div>
-      <div class="center" style="position:absolute;left:0;right:0;top:147mm">
+      <div class="center" style="position:absolute;left:12mm;right:12mm;top:147mm">
         <div class="ivy" style="font-size:15pt">${esc(c.groom)} &amp; ${esc(c.bride)}</div>
         <div class="label" style="margin-top:1.6mm">${esc(D.dates)}</div>
         <div class="ivy" style="font-size:11.5pt;color:var(--copper);margin-top:1.8mm">${esc(D.hashtag)}</div>
@@ -169,18 +187,26 @@
     if (!used.size) return "";
     pageNo++;
     const rows = [...used.entries()].map(([id, u]) => `<tr><td style="white-space:nowrap;font-weight:500;color:#8E2318">P${u.no}</td><td>${esc(PHS[id] || id)}</td><td>${[...u.where].map(esc).join(", ")}</td></tr>`).join("");
-    return `<section class="page todo">
+    // the route sentences were written from the venue address, not supplied: list them for a check
+    const routes = [...new Set(D.events.flatMap((e) => [...e.directions.fromBhopal, ...e.directions.fromVidisha]).filter((l) => !isPh(l)))];
+    const confirm = [
+      ["Travel lines", `from the website’s “How to Reach”, on the schedule page: ${D.travel.map(([k, v]) => `${esc(k)} — ${esc(v)}`).join("; ")}.`],
+      ["Directions", `written from the venue address, on the event pages: ${routes.map((r) => `“${esc(r)}”`).join(" ")}`],
+      ...(window.CONFIRM || []).map(([k, v]) => [esc(k), esc(v)]),
+    ];
+    return `<section class="page todo"><div class="trim">
       <div class="frame"></div>
       <div class="content" style="padding:12mm 12mm">
         <span class="warn">NOT PART OF THE INVITE · REMOVE BEFORE SHARING</span>
-        <h1 class="ivy" style="font-weight:500;color:var(--copper);font-size:20pt;margin:4mm 0 1mm">Before printing: details to supply</h1>
-        <p style="font-size:8.2pt;line-height:1.45;margin:0 0 3mm">Each item below appears in the invite as a red, dashed <b>PLACEHOLDER</b>. Replace it in <code>invite/data.js</code> and run <code>node invite/build.cjs --final</code>; this page is then left out.</p>
+        <h1 class="ivy" style="font-weight:500;color:var(--copper);font-size:18pt;margin:3mm 0 1mm">Before printing: details to supply</h1>
+        <p style="font-size:8pt;line-height:1.4;margin:0 0 2mm">Each item below appears in the invite as a red, dashed <b>PLACEHOLDER</b>. Replace it in <code>invite/data.js</code> and run <code>node invite/build.cjs --final</code>; this page is then left out.</p>
         <table><thead><tr><th>No.</th><th>Detail needed</th><th>Appears on</th></tr></thead><tbody>${rows}</tbody></table>
-        <p style="font-size:8pt;line-height:1.45;margin:4mm 0 0"><b style="color:var(--copper)">Please also confirm</b> these travel lines, taken from the website's “How to Reach”: ${D.travel.map(([k, v]) => `${esc(k)} — ${esc(v)}`).join("; ")}.</p>
-      </div></section>`;
+        <h2>Please confirm</h2>
+        <ul>${confirm.map(([k, v]) => `<li><b style="font-weight:500;color:var(--copper-text)">${k}</b> ${v}</li>`).join("")}</ul>
+      </div></div></section>`;
   }
 
-  const final = new URLSearchParams(location.search).has("final");
+  const final = params.has("final");
   const pages = [cover(), glance(), ...D.events.map(eventPage), closing()];
   const todoPage = todo();
   document.getElementById("doc").innerHTML = pages.join("") + (final ? "" : todoPage);
@@ -192,13 +218,27 @@
     // CSS mask images are fetched lazily; load them before printing
     await Promise.all(["assets/cover-mask.png", "assets/closing-mask.png"].map((src) => { const m = new Image(); m.src = src; return m.decode(); }));
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    // report anything that does not fit its page
-    const problems = [];
+    // report anything that does not fit its page: text stays inside the inner gold frame and clear of
+    // the footer, and each event's theme and dress code fit beside its picture
+    const mm = 96 / 25.4, problems = [];
+    const what = (el) => `${el.className || el.tagName.toLowerCase()} “${el.textContent.trim().slice(0, 40)}”`;
     document.querySelectorAll(".page").forEach((p, i) => {
-      const box = p.getBoundingClientRect();
-      p.querySelectorAll(".lower, .content > div, .mid, .box").forEach((el) => {
+      const t = p.querySelector(".trim").getBoundingClientRect();
+      const left = t.left + 6 * mm, right = t.right - 6 * mm, bottom = t.bottom - (p.querySelector(".footer") ? 12.5 : 7) * mm;
+      const bad = new Set(); // report the outermost element only
+      p.querySelectorAll(".content *").forEach((el) => {
+        if (el.closest(".content > .art, svg")) return; // the cover and closing pictures run to the edge
         const r = el.getBoundingClientRect();
-        if (r.bottom > box.bottom - 12.5 * 3.78 && !el.closest(".cover") && !el.classList.contains("await")) problems.push(`page ${i + 1}: ${el.className || el.tagName} ends ${((box.bottom - r.bottom) / 3.78).toFixed(1)} mm from the page bottom`);
+        if (!r.width || !r.height) return;
+        const msg = r.bottom > bottom + 0.5 ? `ends ${((t.bottom - r.bottom) / mm).toFixed(1)} mm from the page bottom`
+          : r.right > right + 0.5 || r.left < left - 0.5 ? "runs past the frame" : "";
+        if (!msg) return;
+        if (!bad.has(el.parentElement)) problems.push(`page ${i + 1}: ${what(el)} ${msg}`);
+        bad.add(el);
+      });
+      p.querySelectorAll(".mid").forEach((m) => {
+        const f = m.querySelector(".facts"), mb = m.getBoundingClientRect().bottom;
+        if (f.scrollHeight > f.clientHeight + 1 || [...f.children].some((c) => c.getBoundingClientRect().bottom > mb + 0.5)) problems.push(`page ${i + 1}: theme / dress code do not fit beside the picture`);
       });
     });
     return { pages: document.querySelectorAll(".page").length, placeholders: window.PLACEHOLDERS_USED.length, problems };
