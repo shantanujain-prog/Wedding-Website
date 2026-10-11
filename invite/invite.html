@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shantanu &amp; Dr. Pragati — Wedding Invitation</title>
+<style>
+  @font-face { font-family: "Ivy"; src: url(../video/assets/fonts/IvyOraDisplay-Regular.woff2); font-weight: 400; }
+  @font-face { font-family: "Ivy"; src: url(../video/assets/fonts/IvyOraDisplay-Medium.woff2); font-weight: 500; }
+  @font-face { font-family: "Sig"; src: url(../video/assets/fonts/BrotherSignature.woff2); }
+  @font-face { font-family: "Gotham"; src: url(../video/assets/fonts/Gotham-Light.woff2); font-weight: 300; }
+  @font-face { font-family: "Gotham"; src: url(../video/assets/fonts/Gotham-Book.woff2); font-weight: 400; }
+  @font-face { font-family: "Gotham"; src: url(../video/assets/fonts/Gotham-Medium.woff2); font-weight: 500; }
+
+  :root { --cream: #FFEFE0; --copper: #AB5626; --gold: #DDA45D; --brown: #5F250F; --ink: #4A1D0B; }
+  @page { size: 148mm 210mm; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #E9DCCB; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .page { position: relative; width: 148mm; height: 210mm; overflow: hidden; break-after: page; margin: 0 auto;
+          background: radial-gradient(ellipse at 50% 34%, #FFF9F1 0%, #FFEFE0 58%, #F8E0C4 100%); color: var(--brown);
+          font-family: "Gotham", sans-serif; }
+  .page:last-child { break-after: auto; }
+  @media screen { .page { margin: 8mm auto; box-shadow: 0 2mm 8mm rgba(60,22,6,.25); } }
+
+  /* the double gold frame, the garland and bells on every page */
+  .frame { position: absolute; inset: 4.5mm; border: .55mm solid var(--gold); border-radius: 2.2mm; pointer-events: none; z-index: 5; }
+  .frame::after { content: ""; position: absolute; inset: 1.1mm; border: .2mm solid var(--gold); border-radius: 1.4mm; }
+  .corner { position: absolute; width: 5mm; height: 5mm; z-index: 6; }
+  .garland { position: absolute; left: 0; top: 0; width: 148mm; z-index: 7; }
+  .bell { position: absolute; top: -1mm; width: 4.2mm; z-index: 7; }
+  .mandala { position: absolute; z-index: 0; opacity: .1; }
+  .content { position: absolute; inset: 0; z-index: 4; }
+  .footer { position: absolute; left: 0; right: 0; bottom: 7.2mm; text-align: center; font-family: "Ivy", serif; font-size: 8.5pt; color: var(--copper); z-index: 6; }
+  .footer .no { font-family: "Gotham", sans-serif; font-size: 6.5pt; letter-spacing: .2em; color: rgba(95,37,15,.6); margin-left: 2mm; }
+
+  .center { text-align: center; }
+  .ivy { font-family: "Ivy", serif; }
+  .sig { font-family: "Sig", cursive; }
+  .label { font-family: "Gotham", sans-serif; font-weight: 500; font-size: 6.8pt; letter-spacing: .24em; text-transform: uppercase; color: var(--copper); }
+  .divider { display: block; margin: 0 auto; }
+
+  /* placeholders: impossible to miss, impossible to mistake for final text */
+  .ph { display: inline; font-family: "Gotham", sans-serif; font-weight: 500; font-size: 7.4pt; line-height: 1.55; color: #8E2318;
+        background: repeating-linear-gradient(-45deg, #FFF1E4 0 1.2mm, #FCE0CC 1.2mm 2.4mm); border: .3mm dashed #C0392B; border-radius: .8mm;
+        padding: .2mm 1mm; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .ph b { font-weight: 500; color: #FFF; background: #C0392B; border-radius: .5mm; padding: 0 .8mm; margin-right: .8mm; font-size: 6.2pt; letter-spacing: .08em; }
+
+  /* cover */
+  .cover .shri { position: absolute; left: 50%; top: 19mm; width: 40mm; transform: translateX(-50%); }
+  .cover .shlok { position: absolute; left: 50%; top: 31.5mm; width: 76mm; transform: translateX(-50%); }
+  .cover .invite { position: absolute; left: 22mm; right: 22mm; top: 50mm; font-size: 10.5pt; line-height: 1.35; }
+  .cover .name { font-family: "Ivy", serif; font-weight: 500; font-size: 36pt; line-height: 1; color: var(--copper); }
+  .cover .parents { font-size: 8.4pt; margin-top: 1.6mm; color: var(--ink); }
+  .cover .weds { font-family: "Sig", cursive; font-size: 30pt; line-height: 1; margin: 3mm 0 2mm; color: var(--brown); }
+  .cover .when { font-family: "Ivy", serif; font-size: 17pt; color: var(--brown); }
+  .cover .where { margin-top: 1.4mm; }
+  .cover .tag { font-family: "Ivy", serif; font-size: 12.5pt; color: var(--copper); margin-top: 2.6mm; }
+  .cover .art { position: absolute; left: 0; bottom: 0; width: 148mm; height: 66.4mm;
+                -webkit-mask-image: url(assets/cover-mask.png); mask-image: url(assets/cover-mask.png); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+
+  /* at a glance */
+  .glance h1, .event h1 { margin: 0; font-family: "Ivy", serif; font-weight: 500; color: var(--copper); }
+  .glance .row { display: grid; grid-template-columns: 17mm 1fr 45mm; align-items: center; column-gap: 3.5mm; padding: 2.1mm 0; border-bottom: .2mm solid rgba(221,164,93,.7); }
+  .glance .row:last-child { border-bottom: 0; }
+  .glance .date { text-align: center; border: .3mm solid var(--gold); border-radius: 1.6mm; padding: 1.2mm 0 1.4mm; background: rgba(255,250,242,.9); }
+  .glance .date .d { font-family: "Ivy", serif; font-weight: 500; font-size: 15pt; line-height: 1; color: var(--brown); }
+  .glance .ev { font-family: "Ivy", serif; font-weight: 500; font-size: 13pt; color: var(--copper); line-height: 1.05; }
+  .glance .ev small { font-family: "Gotham", sans-serif; font-weight: 400; font-size: 7.6pt; color: var(--ink); display: block; margin-top: .8mm; letter-spacing: .02em; }
+  .glance .venue { font-size: 7.8pt; line-height: 1.35; color: var(--ink); }
+  .box { border: .3mm solid var(--gold); border-radius: 2mm; background: rgba(255,250,243,.92); padding: 2.6mm 3.4mm; }
+  .box p { margin: .8mm 0 0; font-size: 8.4pt; line-height: 1.4; color: var(--ink); }
+  .box .k { font-weight: 500; color: var(--copper); }
+
+  /* event pages */
+  .event .count { position: absolute; left: 0; right: 0; top: 16.5mm; }
+  .event h1 { position: absolute; left: 0; right: 0; top: 20mm; font-size: 31pt; line-height: 1.05; text-align: center; }
+  .event .temple { font-family: "Ivy", serif; font-weight: 400; font-size: 15pt; color: var(--copper); }
+  .event .subtitle { position: absolute; left: 16mm; right: 16mm; top: 33.6mm; text-align: center; font-family: "Ivy", serif; font-size: 11.6pt; line-height: 1.3; color: var(--brown); }
+  .event .when { position: absolute; left: 0; right: 0; top: 47.4mm; text-align: center; font-weight: 500; font-size: 8.4pt; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+  .event .mid { position: absolute; left: 13mm; right: 12mm; top: 55mm; height: 60mm; display: grid; grid-template-columns: 48mm 1fr; column-gap: 7mm; }
+  .event .art { position: relative; width: 48mm; height: 60mm; }
+  .event .art img { width: 100%; height: 100%; object-fit: cover; border-radius: 24mm 24mm 2mm 2mm;
+                    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18%); mask-image: linear-gradient(to bottom, transparent 0, #000 18%); }
+  .event .art::after { content: ""; position: absolute; inset: -1.2mm; border: .45mm solid var(--gold); border-radius: 25.2mm 25.2mm 3.2mm 3.2mm; }
+  .event .facts { display: flex; flex-direction: column; justify-content: center; gap: 5mm; }
+  .event .fact .v { font-family: "Ivy", serif; font-size: 12pt; line-height: 1.25; margin-top: 1.2mm; color: var(--brown); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 2.4mm 3.4mm; margin-top: 2mm; }
+  .sw { display: flex; align-items: center; gap: 1.4mm; font-size: 7.2pt; color: var(--ink); }
+  .sw i { display: inline-block; width: 5.2mm; height: 5.2mm; border-radius: 50%; border: .3mm solid rgba(95,37,15,.35); }
+  .sw i.glitter { background: radial-gradient(circle at 30% 30%, #fff 0 8%, transparent 9%), radial-gradient(circle at 70% 60%, #fff 0 6%, transparent 7%),
+                  radial-gradient(circle at 45% 75%, #fff 0 5%, transparent 6%), linear-gradient(135deg, #BFC3CC, #F4F1EA 40%, #A9ADB6 60%, #E8E3D8); }
+  .attire { margin: 1.2mm 0 0; padding: 0; list-style: none; }
+  .attire li { font-family: "Ivy", serif; font-size: 12pt; line-height: 1.3; color: var(--brown); }
+  .attire li span { font-family: "Gotham", sans-serif; font-weight: 500; font-size: 7pt; letter-spacing: .14em; text-transform: uppercase; color: var(--copper); margin-right: 1.6mm; }
+  .event .lower { position: absolute; left: 12mm; right: 12mm; top: 120.5mm; display: flex; flex-direction: column; gap: 3.2mm; }
+  .event .loc { display: grid; grid-template-columns: 7mm 1fr; column-gap: 2.4mm; }
+  .event .loc .place { font-family: "Ivy", serif; font-weight: 500; font-size: 13.5pt; color: var(--brown); line-height: 1.15; margin-top: .6mm; }
+  .event .loc .town { font-weight: 500; font-size: 7.4pt; letter-spacing: .16em; text-transform: uppercase; color: var(--copper); margin-top: .8mm; }
+  .event .loc .addr { font-size: 8.3pt; line-height: 1.42; color: var(--ink); margin-top: 1.2mm; }
+  .event .loc .map { font-size: 8.3pt; margin-top: 1.2mm; color: var(--ink); }
+  .event .loc .map a { color: var(--copper); font-weight: 500; text-decoration: underline; }
+  .event .go { display: grid; grid-template-columns: 1fr 1fr; column-gap: 5mm; padding: 0 1mm; }
+  .event .go p { margin: 1mm 0 0; font-size: 8.2pt; line-height: 1.42; color: var(--ink); }
+
+  /* closing */
+  .closing .await { position: absolute; left: 0; right: 0; top: 19mm; text-align: center; }
+  .closing .medal { position: absolute; left: 50%; top: 52mm; width: 86mm; height: 92mm; transform: translateX(-50%);
+                    border-radius: 43mm 43mm 4mm 4mm; background: radial-gradient(ellipse at 50% 40%, #50210D 0%, #2E1107 60%, #1A0904 100%);
+                    box-shadow: 0 0 0 .6mm var(--gold), 0 0 0 1.6mm #FFF6EC, 0 0 0 1.9mm var(--gold); }
+  .closing .medal img { position: absolute; inset: 0; width: 86mm; height: 92mm; border-radius: 43mm 43mm 4mm 4mm; }
+  .closing .art { position: absolute; left: 0; bottom: 0; width: 148mm; height: 53.6mm;
+                  -webkit-mask-image: url(assets/closing-mask.png); mask-image: url(assets/closing-mask.png); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+
+  /* the placeholder list */
+  .todo table { width: 100%; border-collapse: collapse; font-size: 7.8pt; color: var(--ink); }
+  .todo th { text-align: left; font-weight: 500; font-size: 6.6pt; letter-spacing: .14em; text-transform: uppercase; color: var(--copper); padding: 1.2mm 1mm; border-bottom: .3mm solid var(--gold); }
+  .todo td { padding: 1.3mm 1mm; border-bottom: .2mm solid rgba(221,164,93,.6); vertical-align: top; line-height: 1.35; }
+  .todo .warn { display: inline-block; background: #C0392B; color: #fff; font-weight: 500; font-size: 7pt; letter-spacing: .12em; padding: 1mm 2.4mm; border-radius: .8mm; }
+</style>
+</head>
+<body>
+<div id="doc"></div>
+<script src="data.js"></script>
+<script src="invite.js"></script>
+</body>
+</html>
